@@ -1,0 +1,210 @@
+\documentclass[letterpaper,11pt]{article}
+\usepackage[T1]{fontenc}
+\fontfamily{Georgia}\selectfont
+\fontseries{m}\selectfont
+% \fontseries{bx}\selectfont
+\usepackage{latexsym}
+\usepackage{microtype}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
+
+\renewcommand{\bfseries}{\fontseries{b}\selectfont}
+
+%----------FONT OPTIONS----------
+% sans-serif
+% \usepackage[sfdefault]{FiraSans}
+% \usepackage[sfdefault]{roboto}
+% \usepackage[sfdefault]{noto-sans}
+% \usepackage[default]{sourcesanspro}
+
+% serif
+% \usepackage{CormorantGaramond}
+% \usepackage{charter}
+
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.55in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+    \vspace{-4pt}\raggedright\small\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure that generate pdf is machine readable/ATS parsable
+\pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+
+\newcommand{\resumeItem}[1]{
+    \item\small{
+            {#1 \vspace{-2pt}}
+    }
+}
+
+\newcommand{\resumeSubheading}[4]{
+    \vspace{-2pt}\item
+    \begin{tabular*}{\textwidth}[t]{l@{\extracolsep{\fill}}r}
+        \normalsize\textbf{#1} & #2 \\
+        \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \item
+    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+        \textit{\small#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+        \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\scriptsize$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=.4in, labelsep=.13in]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%----------HEADING----------
+\begin{center}
+{\LARGE \scshape \bfseries Sohaib Kaidali} \\ \vspace{1pt}
+\small 
++1 (438) 938-1917 
+$|$ 
+\href{mailto:kaidalisohaib@gmail.com}{\underline{kaidalisohaib@gmail.com}} 
+$|$ 
+\href{https://www.linkedin.com/in/sohaib-kaidali}{\underline{linkedin.com/in/sohaib-kaidali}} 
+$|$ 
+\href{https://github.com/kaidalisohaib}{\underline{github.com/kaidalisohaib}}
+\end{center}
+
+%-----------EDUCATION-----------
+\section{EDUCATION}
+\resumeSubHeadingListStart
+% \resumeSubheading
+% {Vanier College}{Montreal, QC}
+% {DEC in Pure and Applied Science}{Jan. 2023 -- May. 2025}
+
+\resumeSubheading
+{McGill University}{Montreal, QC}
+{B.Eng. in Computer Engineering}{Fall 2025}
+\resumeSubHeadingListEnd
+
+%-----------EXPERIENCE-----------
+\section{PROFESSIONAL EXPERIENCE}
+\resumeSubHeadingListStart
+
+\resumeSubheading
+{FIRST Robotics Team 3986 - Express-O}{Montreal, QC}
+{Captain, Pilot, and Lead Developer}{Jan. 2020 -- Jun. 2022}
+\resumeItemListStart
+\resumeItem{Engineered an advanced motor control system integrating PID, feedforward control, gain scheduling, and hysteresis filtering with real-time sensor feedback, achieving smoother acceleration, reduced overshoot, and a 20\% boost in precision under variable loads.}
+\resumeItem{Designed and deployed a robust computer vision pipeline using OpenCV, which fused camera data with odometry to enhance real-time robot localization and navigation accuracy, reducing positional drift during complex maneuvers.}
+\resumeItem{Led team to victory in the 2023 Montreal Regional Championship, qualifying for the FIRST World Championship.}
+\resumeItem{Secured annual \$5,000 grant from the Montreal Mayor’s Office to fund team operations and earned the Fusion Jeunesse Leaders MTL Scholarship (\$2,000) for individual leadership in advancing STEM education.}
+\resumeItemListEnd
+
+\resumeSubheading
+{MotionCorrect, Inc.}{Remote}
+{Software Development Consultant Intern}{Jun. 2022 -- Present}
+\resumeItemListStart
+\resumeItem{Optimized CI/CD pipelines, reducing build time from 2 hours to 20 minutes per release.}
+\resumeItem{Automated Git workflows to streamline development cycles and improve team productivity.}
+\resumeItem{Conducted code reviews to enforce software development best practices across codebases.}
+\resumeItemListEnd
+
+\resumeSubheading
+{Vanier College}{Montreal, QC}
+{Mechanics Laboratory Assistant}{Jan. 2023 -- May 2024}
+\resumeItemListStart
+\resumeItem{Mentored students in mechanics labs by troubleshooting technical challenges and developing structured problem-solving frameworks tailored to skill levels, improving comprehension of core concepts.} 
+\resumeItemListEnd
+\resumeSubHeadingListEnd
+
+%-----------PROJECTS-----------
+\section{SELECTED PROJECTS}
+\resumeSubHeadingListStart
+\resumeProjectHeading
+{\textbf{Hackathon Achievements} | \href{https://devpost.com/kaidalisohaib}{\underline{Devpost}}}{2023--2025}
+\resumeItemListStart
+\resumeItem{4× first-place \& 2× podium finishes across MariHacks, JACHacks, DawHacks, D.AI Journalism, and IEEE BotQuest.}
+\resumeItemListEnd
+
+%----- AMCL -----
+\resumeProjectHeading
+{\textbf{Adaptive Monte Carlo Localization (AMCL)} | \href{https://github.com/kaidalisohaib/AMCL-Visualization}{\underline{GitHub}} | \href{https://kaidalisohaib.github.io/AMCL-Visualization/}{\underline{Website}}}{\textit{Unity, C\#, Particle Filters}}
+\resumeItemListStart
+\resumeItem{Developed an AMCL algorithm using particle filters to localize a robot in a dynamic environment.}
+\resumeItem{Implemented adaptive resampling and particle clustering to enhance localization accuracy and efficiency.}
+\resumeItem{Integrated raycasting and sensor data for real-time position correction and visualization.}
+\resumeItem{Optimized the particle system to prevent false grouping of particles and ensure robust localization.}
+\resumeItemListEnd
+
+\resumeProjectHeading
+{\textbf{Rubber Duck Sumo Robot | C++, ESP32, PID, VL53L4CD} | \href{https://github.com/cabbagecultist/Sumo}{\underline{GitHub}}}{IEEE Sumo-Bot Competition 2025}
+\resumeItemListStart
+\resumeItem{Built a 5-ToF + 4-QTR sensing halo with dynamic I\textsuperscript{2}C bus-recovery, mapping 180° opponent vectors at 100 Hz and feeding a SEEK, ALIGN, PUSH FSM driven by anti-windup PID torque control for 1.7 m/s pushes.}
+\resumeItem{Tuned dual-VNH5019 drive for 1.7 m/s push velocity and zero ring-outs throughout qualification.} 
+\resumeItemListEnd
+
+\resumeSubHeadingListEnd
+% \vspace{5pt}
+
+%-----------SKILLS-----------
+\section{TECHNICAL SKILLS}
+\resumeSubHeadingListStart
+\resumeProjectHeading
+{\textbf{Programming:} Python, C/C++, Rust, Java, JavaScript/TypeScript, Shell}{}
+\resumeProjectHeading
+{\textbf{Tools:} Git, Docker, Firebase, CI/CD, Unity, ROS2 (Basics), ESP32, Embedded C/C++, PID, I\textsuperscript{2}C debug, AWS}{}
+\resumeProjectHeading
+{\textbf{Frameworks:} Arduino, WPILib, React, React Native, Node.js, Tauri}{}
+\resumeProjectHeading
+{\textbf{AI/CV:} TensorFlow, PyTorch, MediaPipe, OpenCV, DeepRL  %
+ | \textbf{Languages:} Trilingual (French/English/Derja)}{}
+
+
+
+\resumeSubHeadingListEnd
+
+%-------------------------------------------
+\end{document}

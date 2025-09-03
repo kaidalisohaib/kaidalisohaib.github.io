@@ -1,0 +1,1119 @@
+/*=============== ANIMATION CONTROLLERS ===============*/
+
+/**
+ * Intersection Observer for scroll animations
+ */
+class ScrollAnimations {
+  constructor() {
+    this.observers = new Map();
+    this.init();
+  }
+
+  init() {
+    // Check if user prefers reduced motion
+    if (window.Utils && window.Utils.prefersReducedMotion()) {
+      this.disableAnimations();
+      return;
+    }
+
+    this.setupIntersectionObserver();
+    this.setupScrollAnimations();
+  }
+
+  /**
+   * Disable animations for users who prefer reduced motion
+   */
+  disableAnimations() {
+    const animatedElements = document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right');
+    animatedElements.forEach(element => {
+      element.classList.add('visible');
+    });
+  }
+
+  /**
+   * Setup Intersection Observer for scroll-triggered animations
+   */
+  setupIntersectionObserver() {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          console.log('Element entering view:', entry.target.className);
+          entry.target.classList.add('visible');
+          // Unobserve after animation to improve performance
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe elements with animation classes - include slide-in-up
+    const animatedElements = document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right, .slide-in-up');
+    console.log('Found animated elements:', animatedElements.length);
+    
+    animatedElements.forEach((element, index) => {
+      // Check if element is already in view (for elements above the fold)
+      const rect = element.getBoundingClientRect();
+      const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+      
+      if (isInView) {
+        // Add a small delay for elements already in view
+        setTimeout(() => {
+          element.classList.add('visible');
+        }, index * 100);
+      } else {
+        observer.observe(element);
+      }
+    });
+
+    this.observers.set('scroll', observer);
+    
+    // Setup timeline-specific animations
+    this.setupTimelineAnimations();
+  }
+
+  /**
+   * Setup scroll-based animations
+   */
+  setupScrollAnimations() {
+    // Parallax effect for hero background
+    this.setupParallax();
+    
+    // Progress bar animation
+    this.setupProgressBar();
+    
+    // Counter animations
+    this.setupCounters();
+    
+    // Smooth scrolling between sections
+    this.setupSmoothScrolling();
+    
+    // Enhanced hover effects and micro-interactions
+    this.setupHoverEffects();
+    
+    // Loading animations
+    this.setupLoadingAnimations();
+    
+    // Interactive feedback
+    this.setupInteractiveFeedback();
+  }
+
+  /**
+   * Setup parallax scrolling effect
+   */
+  setupParallax() {
+    const parallaxElements = document.querySelectorAll('[data-parallax]');
+    if (parallaxElements.length === 0) return;
+
+    const handleParallax = window.Utils ? 
+      window.Utils.throttle(() => {
+        const scrolled = window.scrollY;
+        parallaxElements.forEach(element => {
+          const rate = scrolled * (element.dataset.parallax || 0.5);
+          element.style.transform = `translateY(${rate}px)`;
+        });
+      }, 16) : 
+      () => {}; // Fallback if Utils not available
+
+    window.addEventListener('scroll', handleParallax, { passive: true });
+  }
+
+  /**
+   * Setup progress bar animations
+   */
+  setupProgressBar() {
+    const skillsSections = document.querySelectorAll('.skills__content');
+    
+    const observerOptions = {
+      threshold: 0.3,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const skillsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const skillsSection = entry.target;
+          
+          // Only animate if the section is open
+          if (skillsSection.classList.contains('skills__open')) {
+            this.animateProgressBars(skillsSection);
+          }
+          
+          // Don't unobserve - we might need to animate again if user toggles
+        }
+      });
+    }, observerOptions);
+
+    skillsSections.forEach(section => {
+      skillsObserver.observe(section);
+    });
+
+    this.observers.set('skills', skillsObserver);
+  }
+
+  /**
+   * Setup smooth scrolling between sections
+   */
+  setupSmoothScrolling() {
+    // Enhanced smooth scrolling for navigation links
+    const navLinks = document.querySelectorAll('a[href^="#"]');
+    
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+          const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
+          const targetPosition = targetElement.offsetTop - headerHeight - 20;
+          
+          // Smooth scroll with easing
+          this.smoothScrollTo(targetPosition, 800);
+          
+          // Update URL without jumping
+          if (history.pushState) {
+            history.pushState(null, null, targetId);
+          }
+        }
+      });
+    });
+
+    // Scroll to top functionality
+    this.setupScrollToTop();
+  }
+
+  /**
+   * Smooth scroll to position with easing
+   * @param {number} targetPosition - Target scroll position
+   * @param {number} duration - Animation duration in ms
+   */
+  smoothScrollTo(targetPosition, duration = 800) {
+    const startPosition = window.pageYOffset;
+    const distance = targetPosition - startPosition;
+    let startTime = null;
+
+    const easeInOutCubic = (t) => {
+      return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+    };
+
+    const animation = (currentTime) => {
+      if (startTime === null) startTime = currentTime;
+      const timeElapsed = currentTime - startTime;
+      const progress = Math.min(timeElapsed / duration, 1);
+      const ease = easeInOutCubic(progress);
+      
+      window.scrollTo(0, startPosition + distance * ease);
+      
+      if (timeElapsed < duration) {
+        requestAnimationFrame(animation);
+      }
+    };
+
+    requestAnimationFrame(animation);
+  }
+
+  /**
+   * Setup scroll to top button
+   */
+  setupScrollToTop() {
+    // Create scroll to top button if it doesn't exist
+    let scrollTopBtn = document.querySelector('.scroll-top');
+    if (!scrollTopBtn) {
+      scrollTopBtn = document.createElement('button');
+      scrollTopBtn.className = 'scroll-top';
+      scrollTopBtn.innerHTML = '<i class="fas fa-chevron-up"></i>';
+      scrollTopBtn.setAttribute('aria-label', 'Scroll to top');
+      document.body.appendChild(scrollTopBtn);
+    }
+
+    // Show/hide scroll to top button
+    const toggleScrollTop = () => {
+      if (window.scrollY > 300) {
+        scrollTopBtn.classList.add('show');
+      } else {
+        scrollTopBtn.classList.remove('show');
+      }
+    };
+
+    window.addEventListener('scroll', toggleScrollTop, { passive: true });
+
+    // Scroll to top on click
+    scrollTopBtn.addEventListener('click', () => {
+      this.smoothScrollTo(0, 600);
+    });
+  }
+
+  /**
+   * Animate progress bars in a skills section
+   * @param {Element} skillsSection - Skills section element
+   */
+  animateProgressBars(skillsSection) {
+    const progressBars = skillsSection.querySelectorAll('.skills__percentage');
+    
+    progressBars.forEach((bar, index) => {
+      const percentage = bar.dataset.percentage || '0%';
+      
+      // Reset width first
+      bar.style.width = '0%';
+      
+      // Animate with staggered delay
+      setTimeout(() => {
+        bar.style.width = percentage;
+      }, 100 + (index * 150)); // Stagger animations
+    });
+  }
+
+  /**
+   * Setup counter animations
+   */
+  setupCounters() {
+    const counters = document.querySelectorAll('[data-counter]');
+    
+    const observerOptions = {
+      threshold: 0.7,
+      rootMargin: '0px'
+    };
+
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          this.animateCounter(entry.target);
+          counterObserver.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    counters.forEach(counter => {
+      counterObserver.observe(counter);
+    });
+
+    this.observers.set('counter', counterObserver);
+  }
+
+  /**
+   * Animate counter from 0 to target value
+   * @param {Element} element - Counter element
+   */
+  animateCounter(element) {
+    const target = parseInt(element.dataset.counter) || 0;
+    const duration = parseInt(element.dataset.duration) || 2000;
+    const increment = target / (duration / 16); // 60fps
+    let current = 0;
+
+    const updateCounter = () => {
+      current += increment;
+      if (current < target) {
+        element.textContent = Math.floor(current);
+        requestAnimationFrame(updateCounter);
+      } else {
+        element.textContent = target;
+      }
+    };
+
+    updateCounter();
+  }
+
+  /**
+   * Setup timeline-specific animations
+   */
+  setupTimelineAnimations() {
+    const timelineItems = document.querySelectorAll('.timeline__item');
+    if (timelineItems.length === 0) return;
+
+    const observerOptions = {
+      threshold: 0.15,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const timelineObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Add staggered delay based on item index
+          const items = Array.from(document.querySelectorAll('.timeline__item'));
+          const index = items.indexOf(entry.target);
+          
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, index * 150); // 150ms delay between items
+        }
+      });
+    }, observerOptions);
+
+    timelineItems.forEach(item => {
+      timelineObserver.observe(item);
+    });
+
+    this.observers.set('timeline', timelineObserver);
+  }
+
+  /**
+   * Manually trigger progress bar animation for a specific section
+   * @param {Element} skillsSection - Skills section element
+   */
+  triggerProgressAnimation(skillsSection) {
+    if (skillsSection && skillsSection.classList.contains('skills__open')) {
+      this.animateProgressBars(skillsSection);
+    }
+  }
+
+  /**
+   * Setup enhanced hover effects for buttons and cards
+   */
+  setupHoverEffects() {
+    // Enhanced button hover effects
+    const buttons = document.querySelectorAll('.button, .hero__cta, .project__link');
+    buttons.forEach(button => {
+      button.addEventListener('mouseenter', (e) => {
+        this.createRippleEffect(e.target, e);
+      });
+
+      button.addEventListener('mouseleave', (e) => {
+        this.removeRippleEffect(e.target);
+      });
+    });
+
+    // Enhanced card hover effects
+    const cards = document.querySelectorAll('.project__card, .achievement__card, .timeline__item');
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', (e) => {
+        this.enhanceCardHover(e.target, true);
+      });
+
+      card.addEventListener('mouseleave', (e) => {
+        this.enhanceCardHover(e.target, false);
+      });
+    });
+
+    // Social links hover effects
+    const socialLinks = document.querySelectorAll('.hero__social-link');
+    socialLinks.forEach(link => {
+      link.addEventListener('mouseenter', (e) => {
+        this.animateSocialIcon(e.target, true);
+      });
+
+      link.addEventListener('mouseleave', (e) => {
+        this.animateSocialIcon(e.target, false);
+      });
+    });
+  }
+
+  /**
+   * Create ripple effect on button hover
+   * @param {Element} element - Button element
+   * @param {Event} event - Mouse event
+   */
+  createRippleEffect(element, event) {
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple-effect';
+    
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+    
+    ripple.style.cssText = `
+      position: absolute;
+      width: ${size}px;
+      height: ${size}px;
+      left: ${x}px;
+      top: ${y}px;
+      background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple 0.6s ease-out;
+      pointer-events: none;
+      z-index: 1;
+    `;
+    
+    element.style.position = 'relative';
+    element.style.overflow = 'hidden';
+    element.appendChild(ripple);
+    
+    setTimeout(() => {
+      if (ripple.parentNode) {
+        ripple.parentNode.removeChild(ripple);
+      }
+    }, 600);
+  }
+
+  /**
+   * Remove ripple effect
+   * @param {Element} element - Button element
+   */
+  removeRippleEffect(element) {
+    const ripples = element.querySelectorAll('.ripple-effect');
+    ripples.forEach(ripple => {
+      ripple.style.animation = 'ripple-out 0.3s ease-out forwards';
+    });
+  }
+
+  /**
+   * Enhance card hover effects
+   * @param {Element} card - Card element
+   * @param {boolean} isHovering - Whether mouse is hovering
+   */
+  enhanceCardHover(card, isHovering) {
+    if (isHovering) {
+      card.style.transform = 'translateY(-8px) scale(1.02)';
+      card.style.boxShadow = '0 20px 40px rgba(79, 70, 229, 0.2)';
+      
+      // Animate card content
+      const content = card.querySelector('.project__content, .achievement__content, .timeline__content');
+      if (content) {
+        content.style.transform = 'translateY(-4px)';
+      }
+      
+      // Animate image if present
+      const img = card.querySelector('.project__img, .achievement__img');
+      if (img) {
+        img.style.transform = 'scale(1.05)';
+      }
+    } else {
+      card.style.transform = 'translateY(0) scale(1)';
+      card.style.boxShadow = '';
+      
+      const content = card.querySelector('.project__content, .achievement__content, .timeline__content');
+      if (content) {
+        content.style.transform = 'translateY(0)';
+      }
+      
+      const img = card.querySelector('.project__img, .achievement__img');
+      if (img) {
+        img.style.transform = 'scale(1)';
+      }
+    }
+  }
+
+  /**
+   * Animate social media icons
+   * @param {Element} link - Social link element
+   * @param {boolean} isHovering - Whether mouse is hovering
+   */
+  animateSocialIcon(link, isHovering) {
+    const icon = link.querySelector('i');
+    if (!icon) return;
+
+    if (isHovering) {
+      link.style.transform = 'translateY(-3px) scale(1.1)';
+      link.style.boxShadow = '0 8px 16px rgba(79, 70, 229, 0.3)';
+      icon.style.transform = 'rotate(5deg)';
+    } else {
+      link.style.transform = 'translateY(0) scale(1)';
+      link.style.boxShadow = '';
+      icon.style.transform = 'rotate(0deg)';
+    }
+  }
+
+  /**
+   * Setup loading animations and micro-interactions
+   */
+  setupLoadingAnimations() {
+    // Staggered fade-in for elements
+    this.setupStaggeredAnimations();
+    
+    // Loading skeleton animations
+    this.setupSkeletonLoading();
+    
+    // Page transition effects
+    this.setupPageTransitions();
+  }
+
+  /**
+   * Setup staggered animations for grouped elements
+   */
+  setupStaggeredAnimations() {
+    const groups = [
+      { selector: '.project__card', delay: 100 },
+      { selector: '.achievement__card', delay: 150 },
+      { selector: '.timeline__item', delay: 200 },
+      { selector: '.skills__data', delay: 50 }
+    ];
+
+    groups.forEach(group => {
+      const elements = document.querySelectorAll(group.selector);
+      
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const staggerObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const elements = Array.from(document.querySelectorAll(group.selector));
+            const index = elements.indexOf(entry.target);
+            
+            setTimeout(() => {
+              entry.target.classList.add('stagger-visible');
+            }, index * group.delay);
+            
+            staggerObserver.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      elements.forEach(element => {
+        element.classList.add('stagger-hidden');
+        staggerObserver.observe(element);
+      });
+    });
+  }
+
+  /**
+   * Setup skeleton loading animations
+   */
+  setupSkeletonLoading() {
+    // Add skeleton loading for images
+    const images = document.querySelectorAll('img[src]');
+    images.forEach(img => {
+      if (!img.complete) {
+        img.classList.add('loading-skeleton');
+        
+        img.addEventListener('load', () => {
+          img.classList.remove('loading-skeleton');
+          img.classList.add('loaded');
+        });
+        
+        img.addEventListener('error', () => {
+          img.classList.remove('loading-skeleton');
+          img.classList.add('error');
+        });
+      }
+    });
+  }
+
+  /**
+   * Setup page transition effects
+   */
+  setupPageTransitions() {
+    // Fade in page content on load
+    document.body.classList.add('page-loading');
+    
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.body.classList.remove('page-loading');
+        document.body.classList.add('page-loaded');
+      }, 100);
+    });
+  }
+
+  /**
+   * Setup interactive feedback for user interactions
+   */
+  setupInteractiveFeedback() {
+    // Click feedback for interactive elements
+    this.setupClickFeedback();
+    
+    // Form interaction feedback
+    this.setupFormFeedback();
+    
+    // Navigation feedback
+    this.setupNavigationFeedback();
+  }
+
+  /**
+   * Setup click feedback for interactive elements
+   */
+  setupClickFeedback() {
+    const interactiveElements = document.querySelectorAll(
+      'button, .button, a[href], .project__card, .achievement__card, .nav__link'
+    );
+
+    interactiveElements.forEach(element => {
+      element.addEventListener('click', (e) => {
+        this.createClickFeedback(e.target, e);
+      });
+    });
+  }
+
+  /**
+   * Create visual feedback for clicks
+   * @param {Element} element - Clicked element
+   * @param {Event} event - Click event
+   */
+  createClickFeedback(element, event) {
+    // Create pulse effect
+    const pulse = document.createElement('div');
+    pulse.className = 'click-pulse';
+    
+    const rect = element.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    pulse.style.cssText = `
+      position: absolute;
+      left: ${x}px;
+      top: ${y}px;
+      width: 0;
+      height: 0;
+      background: rgba(79, 70, 229, 0.4);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: click-pulse 0.6s ease-out;
+      pointer-events: none;
+      z-index: 1000;
+    `;
+    
+    element.style.position = 'relative';
+    element.appendChild(pulse);
+    
+    setTimeout(() => {
+      if (pulse.parentNode) {
+        pulse.parentNode.removeChild(pulse);
+      }
+    }, 600);
+  }
+
+  /**
+   * Setup form interaction feedback
+   */
+  setupFormFeedback() {
+    const formInputs = document.querySelectorAll('input, textarea, select');
+    
+    formInputs.forEach(input => {
+      input.addEventListener('focus', (e) => {
+        e.target.parentElement?.classList.add('input-focused');
+      });
+      
+      input.addEventListener('blur', (e) => {
+        e.target.parentElement?.classList.remove('input-focused');
+        if (e.target.value) {
+          e.target.parentElement?.classList.add('input-filled');
+        } else {
+          e.target.parentElement?.classList.remove('input-filled');
+        }
+      });
+      
+      input.addEventListener('input', (e) => {
+        if (e.target.value) {
+          e.target.parentElement?.classList.add('input-filled');
+        } else {
+          e.target.parentElement?.classList.remove('input-filled');
+        }
+      });
+    });
+  }
+
+  /**
+   * Setup navigation feedback
+   */
+  setupNavigationFeedback() {
+    const navLinks = document.querySelectorAll('.nav__link');
+    
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        // Add active state animation
+        link.classList.add('nav-clicked');
+        setTimeout(() => {
+          link.classList.remove('nav-clicked');
+        }, 300);
+      });
+    });
+  }
+
+  /**
+   * Cleanup observers
+   */
+  destroy() {
+    this.observers.forEach(observer => {
+      observer.disconnect();
+    });
+    this.observers.clear();
+  }
+}
+
+/**
+ * Typewriter animation effect
+ */
+class TypewriterAnimation {
+  constructor(element, options = {}) {
+    this.element = element;
+    this.options = {
+      speed: 50,
+      deleteSpeed: 30,
+      pauseTime: 1000,
+      loop: false,
+      cursor: true,
+      cursorChar: '|',
+      delay: 0,
+      ...options
+    };
+    
+    this.text = element.textContent || element.dataset.text || '';
+    this.originalText = this.text;
+    this.element.textContent = '';
+    this.isTyping = false;
+    this.currentIndex = 0;
+    this.textNode = null;
+    
+    this.setupElement();
+  }
+  
+  setupElement() {
+    // Create text node
+    this.textNode = document.createTextNode('');
+    this.element.appendChild(this.textNode);
+    
+    if (this.options.cursor) {
+      this.addCursor();
+    }
+  }
+
+  addCursor() {
+    this.cursor = document.createElement('span');
+    this.cursor.className = 'typewriter-cursor';
+    this.cursor.textContent = this.options.cursorChar;
+    this.cursor.style.cssText = `
+      animation: blink 1s infinite;
+      font-weight: inherit;
+      color: inherit;
+    `;
+    
+    // Add cursor animation styles if not already present
+    if (!document.querySelector('#typewriter-styles')) {
+      const style = document.createElement('style');
+      style.id = 'typewriter-styles';
+      style.textContent = `
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    this.element.appendChild(this.cursor);
+  }
+
+  async type() {
+    if (this.isTyping) {
+      console.log('Already typing, returning');
+      return;
+    }
+    
+    console.log('Starting to type:', this.text);
+    this.isTyping = true;
+    
+    // Apply initial delay if specified
+    if (this.options.delay > 0) {
+      await this.delay(this.options.delay);
+    }
+    
+    for (let i = 0; i <= this.text.length; i++) {
+      const currentText = this.text.slice(0, i);
+      if (this.textNode) {
+        this.textNode.textContent = currentText;
+      }
+      
+      await this.delay(this.options.speed);
+    }
+    
+    if (this.options.loop) {
+      await this.delay(this.options.pauseTime);
+      await this.delete();
+      await this.delay(this.options.pauseTime);
+      this.type();
+    } else {
+      this.isTyping = false;
+      // Remove cursor after typing is complete if not looping
+      if (this.cursor && !this.options.loop) {
+        setTimeout(() => {
+          if (this.cursor && this.cursor.parentNode) {
+            this.cursor.style.opacity = '0';
+          }
+        }, 2000);
+      }
+    }
+  }
+
+  async delete() {
+    for (let i = this.text.length; i >= 0; i--) {
+      const currentText = this.text.slice(0, i);
+      if (this.textNode) {
+        this.textNode.textContent = currentText;
+      }
+      
+      await this.delay(this.options.deleteSpeed);
+    }
+  }
+
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  start() {
+    console.log('TypewriterAnimation start() called for:', this.text);
+    if (this.options.delay > 0) {
+      console.log('Starting with delay:', this.options.delay);
+      setTimeout(() => {
+        this.type();
+      }, this.options.delay);
+    } else {
+      console.log('Starting immediately');
+      this.type();
+    }
+  }
+
+  stop() {
+    this.isTyping = false;
+  }
+}
+
+/**
+ * Particle animation system
+ */
+class ParticleSystem {
+  constructor(container, options = {}) {
+    this.container = container;
+    this.options = {
+      particleCount: 50,
+      particleSize: 2,
+      particleColor: '#4f46e5',
+      speed: 0.5,
+      connectionDistance: 100,
+      showConnections: true,
+      ...options
+    };
+    
+    this.particles = [];
+    this.canvas = null;
+    this.ctx = null;
+    this.animationId = null;
+    
+    this.init();
+  }
+
+  init() {
+    this.createCanvas();
+    this.createParticles();
+    this.animate();
+    this.handleResize();
+  }
+
+  createCanvas() {
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    `;
+    
+    this.container.appendChild(this.canvas);
+    this.ctx = this.canvas.getContext('2d');
+    this.resizeCanvas();
+  }
+
+  resizeCanvas() {
+    const rect = this.container.getBoundingClientRect();
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+  }
+
+  createParticles() {
+    this.particles = [];
+    for (let i = 0; i < this.options.particleCount; i++) {
+      this.particles.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        vx: (Math.random() - 0.5) * this.options.speed,
+        vy: (Math.random() - 0.5) * this.options.speed,
+        size: Math.random() * this.options.particleSize + 1
+      });
+    }
+  }
+
+  animate() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // Update and draw particles
+    this.particles.forEach(particle => {
+      // Update position
+      particle.x += particle.vx;
+      particle.y += particle.vy;
+      
+      // Bounce off edges
+      if (particle.x < 0 || particle.x > this.canvas.width) {
+        particle.vx *= -1;
+      }
+      if (particle.y < 0 || particle.y > this.canvas.height) {
+        particle.vy *= -1;
+      }
+      
+      // Keep particles in bounds
+      particle.x = Math.max(0, Math.min(this.canvas.width, particle.x));
+      particle.y = Math.max(0, Math.min(this.canvas.height, particle.y));
+      
+      // Draw particle
+      this.ctx.beginPath();
+      this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      this.ctx.fillStyle = this.options.particleColor;
+      this.ctx.fill();
+    });
+    
+    // Draw connections
+    if (this.options.showConnections) {
+      this.drawConnections();
+    }
+    
+    this.animationId = requestAnimationFrame(() => this.animate());
+  }
+
+  drawConnections() {
+    for (let i = 0; i < this.particles.length; i++) {
+      for (let j = i + 1; j < this.particles.length; j++) {
+        const dx = this.particles[i].x - this.particles[j].x;
+        const dy = this.particles[i].y - this.particles[j].y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < this.options.connectionDistance) {
+          const opacity = 1 - (distance / this.options.connectionDistance);
+          this.ctx.beginPath();
+          this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+          this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+          this.ctx.strokeStyle = `rgba(79, 70, 229, ${opacity * 0.3})`;
+          this.ctx.lineWidth = 1;
+          this.ctx.stroke();
+        }
+      }
+    }
+  }
+
+  handleResize() {
+    const resizeHandler = window.Utils ? 
+      window.Utils.debounce(() => {
+        this.resizeCanvas();
+        this.createParticles();
+      }, 250) :
+      () => {
+        this.resizeCanvas();
+        this.createParticles();
+      };
+    
+    window.addEventListener('resize', resizeHandler);
+  }
+
+  destroy() {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
+    if (this.canvas && this.canvas.parentNode) {
+      this.canvas.parentNode.removeChild(this.canvas);
+    }
+  }
+}
+
+// Initialize animations when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('Initializing animations...');
+  
+  // Initialize scroll animations
+  window.scrollAnimations = new ScrollAnimations();
+  
+  // Initialize typewriter animations with sequential timing
+  const typewriterElements = document.querySelectorAll('[data-typewriter]');
+  const typewriterInstances = [];
+  
+  typewriterElements.forEach((element, index) => {
+    const options = {
+      speed: parseInt(element.dataset.speed) || 50,
+      loop: element.dataset.loop === 'true',
+      cursor: element.dataset.cursor !== 'false',
+      delay: parseInt(element.dataset.delay) || 0
+    };
+    
+    const typewriter = new TypewriterAnimation(element, options);
+    typewriterInstances.push(typewriter);
+  });
+  
+  // Start hero typewriter animations sequentially when hero section comes into view
+  const heroSection = document.querySelector('.hero');
+  if (heroSection && typewriterInstances.length > 0) {
+    console.log('Found hero section and typewriter instances:', typewriterInstances.length);
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          console.log('Hero section is intersecting, starting animations');
+          
+          // Start name typewriter immediately
+          const nameTypewriter = typewriterInstances.find(tw => 
+            tw.element.classList.contains('hero__name')
+          );
+          if (nameTypewriter) {
+            console.log('Starting name typewriter');
+            nameTypewriter.start();
+          } else {
+            console.log('Name typewriter not found');
+          }
+          
+          // Start subtitle typewriter after name is complete
+          const subtitleTypewriter = typewriterInstances.find(tw => 
+            tw.element.classList.contains('hero__subtitle')
+          );
+          if (subtitleTypewriter) {
+            console.log('Scheduling subtitle typewriter');
+            setTimeout(() => {
+              console.log('Starting subtitle typewriter');
+              subtitleTypewriter.start();
+            }, 2000); // Delay for name animation
+          } else {
+            console.log('Subtitle typewriter not found');
+          }
+          
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    
+    observer.observe(heroSection);
+    
+    // Fallback: start animations after 2 seconds if intersection observer doesn't trigger
+    setTimeout(() => {
+      const nameTypewriter = typewriterInstances.find(tw => 
+        tw.element.classList.contains('hero__name')
+      );
+      if (nameTypewriter && !nameTypewriter.isTyping) {
+        console.log('Fallback: Starting name typewriter');
+        nameTypewriter.start();
+      }
+    }, 2000);
+  }
+  
+  // Initialize particle systems for hero section
+  const particleContainers = document.querySelectorAll('[data-particles]');
+  particleContainers.forEach(container => {
+    const options = {
+      particleCount: parseInt(container.dataset.particleCount) || 50,
+      particleColor: container.dataset.particleColor || 'rgba(79, 70, 229, 0.6)',
+      speed: parseFloat(container.dataset.speed) || 0.3,
+      connectionDistance: 120,
+      showConnections: true
+    };
+    
+    // Only initialize particles if user doesn't prefer reduced motion
+    if (!window.Utils || !window.Utils.prefersReducedMotion()) {
+      console.log('Initializing particle system for:', container);
+      new ParticleSystem(container, options);
+    }
+  });
+  
+  // Add loading complete class to body
+  setTimeout(() => {
+    document.body.classList.add('animations-loaded');
+  }, 100);
+});
+
+// Export classes for external use
+window.Animations = {
+  ScrollAnimations,
+  TypewriterAnimation,
+  ParticleSystem
+};

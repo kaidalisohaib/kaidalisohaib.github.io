@@ -1,0 +1,42 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+
+    Developer & Designer: Sohaib Kaidali
+    Contact: sohaib.kaidali [at] mail.mcgill.ca
+    GitHub: https://github.com/kaidalisohaib
+    LinkedIn: https://linkedin.com/in/sohaib-kaidali
+    Location: Montreal, QC, Canada
+
+# THANKS
+
+    McGill University - Department of Electrical and Computer Engineering
+    FIRST Robotics Team 3986 - Express-O
+    Open Source Community
+    Font Awesome for icons
+    Google Fonts for typography
+
+# TECHNOLOGY COLOPHON
+
+    HTML5, CSS3, JavaScript (ES6+)
+    Font Awesome Icons
+    Google Fonts (Inter, JetBrains Mono)
+    GitHub Pages Hosting
+    Git Version Control
+    
+    Development Tools:
+    - Visual Studio Code
+    - Chrome DevTools
+    - Lighthouse Performance Audits
+    - W3C Validators
+
+# SITE
+
+    Last update: 2025/09/03
+    Language: English
+    Doctype: HTML5
+    IDE: Visual Studio Code
+    Standards: HTML5, CSS3, WCAG 2.1 AA
+    Components: Vanilla JavaScript, CSS Grid, Flexbox
+    Software: GitHub Pages, Git

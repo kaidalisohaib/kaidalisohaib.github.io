@@ -614,6 +614,7 @@ class PortfolioApp {
     const card = document.createElement('article');
     card.className = `project__card filter-visible`;
     card.setAttribute('data-category', project.category);
+    card.setAttribute('data-project-id', project.id)
 
     const achievementsHTML = project.achievements.map(achievement => `
       <span class="project__achievement-badge project__achievement-badge--${achievement.type}">
@@ -626,26 +627,38 @@ class PortfolioApp {
       <span class="project__tech-tag">${tech}</span>
     `).join('');
 
-    const linksHTML = Object.entries(project.links).map(([type, url]) => {
+    // Add "Learn More" button first, then other links
+    const learnMoreButton = `
+      <a href="#" class="project__link project__link--primary" data-action="learn-more" aria-label="Learn more about ${project.title}">
+        <i class="fas fa-info-circle" aria-hidden="true"></i>
+        Learn More
+      </a>
+    `;
+
+    const externalLinksHTML = Object.entries(project.links).map(([type, url]) => {
       const icons = {
         demo: 'fas fa-external-link-alt',
         github: 'fab fa-github',
-        documentation: 'fas fa-book'
+        documentation: 'fas fa-book',
+        devpost: 'fas fa-trophy'
       };
 
       const labels = {
         demo: 'Live Demo',
         github: 'Source Code',
-        documentation: 'Documentation'
+        documentation: 'Documentation',
+        devpost: 'Devpost'
       };
 
       return `
         <a href="${url}" class="project__link" target="_blank" rel="noopener noreferrer" aria-label="${labels[type]} for ${project.title}">
-          <i class="${icons[type]}" aria-hidden="true"></i>
-          ${labels[type]}
+          <i class="${icons[type] || 'fas fa-link'}" aria-hidden="true"></i>
+          ${labels[type] || type}
         </a>
       `;
     }).join('');
+
+    const linksHTML = learnMoreButton + externalLinksHTML;
 
     // Generate WebP and fallback image sources
     const webpSrc = project.image.replace(/\.(png|jpg|jpeg)$/i, '.webp');

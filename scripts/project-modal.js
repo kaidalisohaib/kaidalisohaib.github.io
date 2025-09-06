@@ -9,6 +9,7 @@ class ProjectModal {
         this.modal = null;
         this.currentProject = null;
         this.cache = new Map(); // Cache README content
+        this.mediaCache = new Map(); // Cache extracted media for project cards
         this.init();
     }
 
@@ -117,12 +118,14 @@ class ProjectModal {
 
         // Preload README content on hover for faster loading
         document.addEventListener('mouseenter', (e) => {
-            const projectCard = e.target.closest('.project__card');
-            if (projectCard) {
-                const projectId = projectCard.dataset.projectId;
-                if (projectId && !this.cache.has(projectId)) {
-                    // Preload content in background
-                    this.preloadProjectContent(projectId);
+            if (e.target && typeof e.target.closest === 'function') {
+                const projectCard = e.target.closest('.project__card');
+                if (projectCard) {
+                    const projectId = projectCard.dataset.projectId;
+                    if (projectId && !this.cache.has(projectId)) {
+                        // Preload content in background
+                        this.preloadProjectContent(projectId);
+                    }
                 }
             }
         }, true); // Use capture phase for better performance
@@ -132,45 +135,164 @@ class ProjectModal {
      * Setup markdown renderer
      */
     setupMarkdownRenderer() {
-        // Simple markdown renderer - you can replace with a more robust one like marked.js
+        // Check if markdown-it is available, otherwise load it
+        if (typeof markdownit !== 'undefined') {
+            this.initializeMarkdownIt();
+        } else {
+            this.loadMarkdownItLibrary().then(() => {
+                this.initializeMarkdownIt();
+            }).catch(() => {
+                console.warn('Failed to load markdown-it, using fallback renderer');
+                this.setupFallbackRenderer();
+            });
+        }
+    }
+
+    /**
+     * Load markdown-it library dynamically
+     */
+    async loadMarkdownItLibrary() {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/markdown-it@14.0.0/dist/markdown-it.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    /**
+     * Initialize markdown-it with default configuration
+     */
+    initializeMarkdownIt() {
+        if (typeof markdownit === 'undefined') {
+            console.warn('markdown-it not available, falling back to simple renderer');
+            this.setupFallbackRenderer();
+            return;
+        }
+
+        // Initialize markdown-it with configuration to enable header IDs
+        const md = markdownit({
+            html: true,        // Enable HTML tags in source
+            linkify: true,     // Autoconvert URL-like text to links
+            typographer: true, // Enable some language-neutral replacement + quotes beautification
+            breaks: false      // Convert '\n' in paragraphs into <br>
+        });
+
+        // Enable the anchor plugin for header IDs
+        md.use(function (md) {
+            // Override heading renderer to add IDs
+            const defaultRender = md.renderer.rules.heading_open || function (tokens, idx, options, env, renderer) {
+                return renderer.renderToken(tokens, idx, options);
+            };
+
+            md.renderer.rules.heading_open = function (tokens, idx, options, env, renderer) {
+                const token = tokens[idx];
+                const title = tokens[idx + 1].content;
+
+                // Generate ID from title with comprehensive Unicode cleaning
+                const id = title
+                    .toLowerCase()
+                    .trim()                                    // Remove leading/trailing whitespace
+                    .replace(/[\u{1F000}-\u{1F9FF}]/gu, '')  // Remove emojis (Unicode blocks)
+                    .replace(/[\u{2600}-\u{26FF}]/gu, '')    // Remove miscellaneous symbols
+                    .replace(/[\u{2700}-\u{27BF}]/gu, '')    // Remove dingbats
+                    .replace(/[\u{FE00}-\u{FE0F}]/gu, '')    // Remove variation selectors
+                    .replace(/[^\w\s-]/g, '')                 // Remove remaining special characters
+                    .replace(/\s+/g, '-')                     // Replace spaces with hyphens
+                    .replace(/-+/g, '-')                      // Replace multiple hyphens with single
+                    .replace(/^-+|-+$/g, '')                  // Remove leading/trailing hyphens
+                    .replace(/^$/, 'heading');                // Fallback for empty strings
+
+                // Add id attribute to the token
+                token.attrSet('id', id);
+
+                return defaultRender(tokens, idx, options, env, renderer);
+            };
+        });
+
         this.markdownRenderer = {
             render: (markdown) => {
-                return markdown
-                    // Headers
-                    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-
-                    // Bold and italic
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-
-                    // Code blocks
-                    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-                    .replace(/`(.*?)`/g, '<code>$1</code>')
-
-                    // Links
-                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-
-                    // Images
-                    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="readme-image">')
-
-                    // Lists
-                    .replace(/^\* (.*$)/gim, '<li>$1</li>')
-                    .replace(/^- (.*$)/gim, '<li>$1</li>')
-                    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-
-                    // Line breaks
-                    .replace(/\n\n/g, '</p><p>')
-                    .replace(/^(?!<[h|u|p|c|i])/gm, '<p>')
-                    .replace(/(?<![>])$/gm, '</p>')
-
-                    // Clean up empty paragraphs
-                    .replace(/<p><\/p>/g, '')
-                    .replace(/<p>(<[h|u])/g, '$1')
-                    .replace(/(<\/[h|u]>)<\/p>/g, '$1');
+                try {
+                    return md.render(markdown);
+                } catch (error) {
+                    console.error('Error rendering markdown:', error);
+                    return this.fallbackRender(markdown);
+                }
             }
         };
+    }
+
+    /**
+     * Generate clean ID from text (matches header ID generation)
+     * @param {string} text - Text to convert to ID
+     * @returns {string} Clean ID
+     */
+    generateCleanId(text) {
+        return text
+            .toLowerCase()
+            .trim()                                    // Remove leading/trailing whitespace
+            .replace(/[\u{1F000}-\u{1F9FF}]/gu, '')  // Remove emojis (Unicode blocks)
+            .replace(/[\u{2600}-\u{26FF}]/gu, '')    // Remove miscellaneous symbols
+            .replace(/[\u{2700}-\u{27BF}]/gu, '')    // Remove dingbats
+            .replace(/[\u{FE00}-\u{FE0F}]/gu, '')    // Remove variation selectors
+            .replace(/[^\w\s-]/g, '')                 // Remove remaining special characters
+            .replace(/\s+/g, '-')                     // Replace spaces with hyphens
+            .replace(/-+/g, '-')                      // Replace multiple hyphens with single
+            .replace(/^-+|-+$/g, '')                  // Remove leading/trailing hyphens
+            .replace(/^$/, 'heading');                // Fallback for empty strings
+    }
+
+    /**
+     * Setup fallback renderer if marked.js fails to load
+     */
+    setupFallbackRenderer() {
+        this.markdownRenderer = {
+            render: (markdown) => this.fallbackRender(markdown)
+        };
+    }
+
+    /**
+     * Simple fallback markdown renderer
+     */
+    fallbackRender(markdown) {
+        return markdown
+            // Headers
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+
+            // Bold and italic
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+
+            // Code blocks
+            .replace(/```[\s\S]*?```/g, (match) => {
+                const code = match.replace(/```(\w+)?\n?/, '').replace(/```$/, '');
+                return `<pre><code>${code}</code></pre>`;
+            })
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+
+            // Links
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+
+            // Images
+            .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="readme-image" loading="lazy">')
+
+            // Lists
+            .replace(/^\* (.*$)/gim, '<li>$1</li>')
+            .replace(/^- (.*$)/gim, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+
+            // Line breaks
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/^(?!<[h|u|p|c|i])/gm, '<p>')
+            .replace(/(?<![>])$/gm, '</p>')
+
+            // Clean up empty paragraphs
+            .replace(/<p><\/p>/g, '')
+            .replace(/<p>(<[h|u])/g, '$1')
+            .replace(/(<\/[h|u]>)<\/p>/g, '$1');
     }
 
     /**
@@ -331,7 +453,7 @@ class ProjectModal {
 
             // Fallback to custom README or project description
             if (!content) {
-                content = await this.fetchCustomReadme(project.id) || this.generateFallbackContent(project);
+                content = await this.fetchCustomReadme(project.id, project.readme) || this.generateFallbackContent(project);
             }
 
             // Cache the content for instant loading later
@@ -370,7 +492,7 @@ class ProjectModal {
 
             // Fallback to custom README or project description
             if (!content) {
-                content = await this.fetchCustomReadme(project.id) || this.generateFallbackContent(project);
+                content = await this.fetchCustomReadme(project.id, project.readme) || this.generateFallbackContent(project);
             }
 
             // Cache the content
@@ -441,13 +563,20 @@ class ProjectModal {
     /**
      * Fetch custom README file
      * @param {string} projectId - Project ID
+     * @param {string} customPath - Optional custom README path
      * @returns {Promise<string>} README content
      */
-    async fetchCustomReadme(projectId) {
+    async fetchCustomReadme(projectId, customPath = null) {
         try {
-            const response = await fetch(`assets/readmes/${projectId}.md`);
+            const readmePath = customPath || `assets/readmes/${projectId}.md`;
+            console.log(`🔍 Fetching README from: ${readmePath} (projectId: ${projectId}, customPath: ${customPath})`);
+            const response = await fetch(readmePath);
             if (response.ok) {
-                return await response.text();
+                const content = await response.text();
+                console.log(`✅ Successfully loaded README from ${readmePath} (${content.length} characters)`);
+                return content;
+            } else {
+                console.warn(`❌ Failed to fetch README from ${readmePath} - Status: ${response.status}`);
             }
         } catch (error) {
             console.error('Error fetching custom README:', error);
@@ -527,6 +656,8 @@ ${Object.entries(project.links).map(([type, url]) => `- [${type.charAt(0).toUppe
         const codeBlocks = contentEl.querySelectorAll('pre code');
         codeBlocks.forEach(block => {
             const pre = block.parentElement;
+
+            // Add copy button
             const copyBtn = document.createElement('button');
             copyBtn.className = 'code-copy-btn';
             copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
@@ -553,9 +684,58 @@ ${Object.entries(project.links).map(([type, url]) => `- [${type.charAt(0).toUppe
         internalLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const target = contentEl.querySelector(link.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    const targetId = href.substring(1);
+
+                    // Try multiple strategies to find the target element
+                    let target = null;
+
+                    // Strategy 1: Try the exact ID (URL-encoded)
+                    try {
+                        const escapedId = CSS.escape(targetId);
+                        target = contentEl.querySelector(`#${escapedId}`);
+                    } catch (e) {
+                        // Invalid selector, continue to next strategy
+                    }
+
+                    // Strategy 2: Try URL-decoded version
+                    if (!target) {
+                        try {
+                            const decodedId = decodeURIComponent(targetId);
+                            const escapedDecodedId = CSS.escape(decodedId);
+                            target = contentEl.querySelector(`#${escapedDecodedId}`);
+                        } catch (e) {
+                            // Invalid selector, continue to next strategy
+                        }
+                    }
+
+                    // Strategy 3: Try to generate clean ID from the link text (fallback)
+                    if (!target) {
+                        const linkText = link.textContent || '';
+                        const cleanId = this.generateCleanId(linkText);
+                        if (cleanId) {
+                            target = contentEl.querySelector(`#${cleanId}`);
+                        }
+                    }
+
+                    // Strategy 4: Find by heading text content
+                    if (!target) {
+                        const linkText = link.textContent || '';
+                        const headings = contentEl.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                        for (const heading of headings) {
+                            if (heading.textContent && heading.textContent.trim() === linkText.trim()) {
+                                target = heading;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        console.warn('Could not find target for link:', href, 'Link text:', link.textContent);
+                    }
                 }
             });
         });
@@ -587,6 +767,360 @@ ${Object.entries(project.links).map(([type, url]) => `- [${type.charAt(0).toUppe
         errorEl.style.display = 'flex';
     }
 
+
+
+    /**
+     * Extract media URLs from README content
+     * @param {string} content - README markdown content
+     * @returns {Array} Array of media URLs
+     */
+    extractMediaFromReadme(content) {
+        const mediaUrls = [];
+
+        // Regex to find markdown images: ![alt](url)
+        const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+        let match;
+
+        while ((match = imageRegex.exec(content)) !== null) {
+            const url = match[2];
+            const alt = match[1] || 'Project image';
+
+            // Include GitHub raw URLs and local asset paths
+            let processedUrl = url;
+            let shouldInclude = false;
+
+            // GitHub URLs
+            if (url.includes('raw.githubusercontent.com') ||
+                url.includes('github.com') && (url.includes('/raw/') || url.includes('/blob/'))) {
+
+                // Convert GitHub blob URLs to raw URLs
+                if (url.includes('/blob/')) {
+                    processedUrl = url.replace('/blob/', '/raw/');
+                }
+                shouldInclude = true;
+            }
+            // Local asset paths
+            else if (url.startsWith('assets/') || url.startsWith('./assets/') || url.startsWith('../assets/')) {
+                shouldInclude = true;
+            }
+
+            if (shouldInclude && /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(processedUrl)) {
+                mediaUrls.push({
+                    url: processedUrl,
+                    alt: alt,
+                    type: processedUrl.toLowerCase().includes('.gif') ? 'gif' : 'image'
+                });
+            }
+        }
+
+        // Also check for HTML img tags
+        const htmlImageRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+        while ((match = htmlImageRegex.exec(content)) !== null) {
+            const url = match[1];
+
+            // Include GitHub URLs and local asset paths
+            const isGitHub = url.includes('raw.githubusercontent.com') ||
+                (url.includes('github.com') && url.includes('/raw/'));
+            const isLocalAsset = url.startsWith('assets/') ||
+                url.startsWith('./assets/') ||
+                url.startsWith('../assets/');
+
+            if ((isGitHub || isLocalAsset) && /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(url)) {
+                mediaUrls.push({
+                    url: url,
+                    alt: 'Project image',
+                    type: url.toLowerCase().includes('.gif') ? 'gif' : 'image'
+                });
+            }
+        }
+
+        // Remove duplicates
+        const uniqueMedia = mediaUrls.filter((media, index, self) =>
+            index === self.findIndex(m => m.url === media.url)
+        );
+
+        return uniqueMedia;
+    }
+
+    /**
+     * Update project card with extracted media
+     * @param {string} projectId - Project ID
+     * @param {Array} mediaUrls - Array of media objects
+     */
+    updateProjectCardMedia(projectId, mediaUrls) {
+        const projectCard = document.querySelector(`[data-project-id="${projectId}"]`);
+        if (!projectCard || mediaUrls.length === 0) return;
+
+        const imgContainer = projectCard.querySelector('.project__img-container');
+        if (!imgContainer) return;
+
+        // Clear existing content
+        imgContainer.innerHTML = '';
+
+        if (mediaUrls.length === 1) {
+            // Single image
+            this.createSingleMediaElement(imgContainer, mediaUrls[0], projectId);
+        } else {
+            // Multiple images - create carousel
+            this.createMediaCarousel(imgContainer, mediaUrls, projectId);
+        }
+    }
+
+    /**
+     * Create single media element
+     * @param {Element} container - Container element
+     * @param {Object} media - Media object
+     * @param {string} projectId - Project ID
+     */
+    createSingleMediaElement(container, media, projectId) {
+        const mediaElement = document.createElement('div');
+        mediaElement.className = 'project__media-single';
+
+        const img = document.createElement('img');
+        img.src = media.url;
+        img.alt = media.alt;
+        img.className = 'project__img';
+        img.loading = 'lazy';
+
+        // Add error handling
+        img.addEventListener('error', () => {
+            console.warn(`Failed to load image for project ${projectId}:`, media.url);
+            // Fallback to placeholder or remove
+            img.src = 'assets/images/project-placeholder.svg';
+        });
+
+        img.addEventListener('load', () => {
+            img.classList.add('loaded');
+        });
+
+        mediaElement.appendChild(img);
+
+        // Add overlay for project achievements
+        const overlay = document.createElement('div');
+        overlay.className = 'project__img-overlay';
+        mediaElement.appendChild(overlay);
+
+        container.appendChild(mediaElement);
+    }
+
+    /**
+     * Create media carousel
+     * @param {Element} container - Container element
+     * @param {Array} mediaUrls - Array of media objects
+     * @param {string} projectId - Project ID
+     */
+    createMediaCarousel(container, mediaUrls, projectId) {
+        const carousel = document.createElement('div');
+        carousel.className = 'project__media-carousel';
+
+        // Create slides container
+        const slidesContainer = document.createElement('div');
+        slidesContainer.className = 'carousel__slides';
+
+        // Create slides
+        mediaUrls.forEach((media, index) => {
+            const slide = document.createElement('div');
+            slide.className = `carousel__slide ${index === 0 ? 'active' : ''}`;
+
+            const img = document.createElement('img');
+            img.src = media.url;
+            img.alt = media.alt;
+            img.className = 'project__img';
+            img.loading = 'lazy';
+
+            img.addEventListener('error', () => {
+                console.warn(`Failed to load carousel image for project ${projectId}:`, media.url);
+                slide.style.display = 'none';
+            });
+
+            img.addEventListener('load', () => {
+                img.classList.add('loaded');
+            });
+
+            slide.appendChild(img);
+            slidesContainer.appendChild(slide);
+        });
+
+        carousel.appendChild(slidesContainer);
+
+        // Create navigation dots
+        if (mediaUrls.length > 1) {
+            const dotsContainer = document.createElement('div');
+            dotsContainer.className = 'carousel__dots';
+
+            mediaUrls.forEach((_, index) => {
+                const dot = document.createElement('button');
+                dot.className = `carousel__dot ${index === 0 ? 'active' : ''}`;
+                dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+
+                dot.addEventListener('click', () => {
+                    this.showCarouselSlide(carousel, index);
+                });
+
+                dotsContainer.appendChild(dot);
+            });
+
+            carousel.appendChild(dotsContainer);
+
+            // Auto-advance carousel
+            this.startCarouselAutoplay(carousel, mediaUrls.length);
+        }
+
+        // Add overlay for project achievements
+        const overlay = document.createElement('div');
+        overlay.className = 'project__img-overlay';
+        carousel.appendChild(overlay);
+
+        container.appendChild(carousel);
+    }
+
+    /**
+     * Show specific carousel slide
+     * @param {Element} carousel - Carousel element
+     * @param {number} index - Slide index
+     */
+    showCarouselSlide(carousel, index) {
+        const slides = carousel.querySelectorAll('.carousel__slide');
+        const dots = carousel.querySelectorAll('.carousel__dot');
+
+        slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === index);
+        });
+
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === index);
+        });
+    }
+
+    /**
+     * Start carousel autoplay
+     * @param {Element} carousel - Carousel element
+     * @param {number} slideCount - Number of slides
+     */
+    startCarouselAutoplay(carousel, slideCount) {
+        let currentSlide = 0;
+
+        const interval = setInterval(() => {
+            // Pause autoplay if user is hovering
+            if (carousel.matches(':hover')) return;
+
+            currentSlide = (currentSlide + 1) % slideCount;
+            this.showCarouselSlide(carousel, currentSlide);
+        }, 4000); // Change slide every 4 seconds
+
+        // Store interval ID for cleanup
+        carousel.dataset.autoplayInterval = interval;
+
+        // Pause on hover
+        carousel.addEventListener('mouseenter', () => {
+            clearInterval(interval);
+        });
+
+        carousel.addEventListener('mouseleave', () => {
+            // Restart autoplay
+            this.startCarouselAutoplay(carousel, slideCount);
+        });
+    }
+
+    /**
+     * Preload all project media in background
+     */
+    async preloadAllProjectMedia() {
+        console.log('🖼️ Starting background media preloading...');
+
+        // Get all projects
+        const projects = portfolioApp?.projects || window.PROJECTS_DATA || [];
+
+        console.log(`📊 Found ${projects.length} projects to process`);
+
+        if (projects.length === 0) {
+            console.warn('⚠️ No projects found! Check if PROJECTS_DATA is loaded.');
+            return;
+        }
+
+        for (const project of projects) {
+            console.log(`🔄 Processing project: ${project.title} (GitHub: ${project.links?.github || 'none'}, Local: ${project.image ? 'image' : 'none'}/${project.readme ? 'readme' : 'none'})`);
+
+            try {
+                // Skip if already cached
+                if (this.mediaCache.has(project.id)) continue;
+
+                let content = '';
+                let mediaUrls = [];
+
+                // Try GitHub first if available
+                if (project.links?.github) {
+                    if (this.cache.has(project.id)) {
+                        content = this.cache.get(project.id);
+                    } else {
+                        content = await this.fetchGitHubReadme(project.links.github);
+                        if (content) {
+                            this.cache.set(project.id, content);
+                        }
+                    }
+
+                    if (content) {
+                        // Extract media URLs from GitHub README
+                        mediaUrls = this.extractMediaFromReadme(content);
+                        console.log(`🔍 Extracted ${mediaUrls.length} GitHub media items for ${project.title}:`, mediaUrls);
+                    }
+                }
+
+                // Fallback to local image and readme if no GitHub media found
+                if (mediaUrls.length === 0) {
+                    // Try local readme first
+                    if (project.readme) {
+                        try {
+                            console.log(`📖 Trying to load local README for ${project.title} from: ${project.readme}`);
+                            const localContent = await this.fetchCustomReadme(project.id, project.readme);
+                            if (localContent) {
+                                const localMediaUrls = this.extractMediaFromReadme(localContent);
+                                if (localMediaUrls.length > 0) {
+                                    mediaUrls = localMediaUrls;
+                                    console.log(`📁 Extracted ${mediaUrls.length} local README media items for ${project.title}:`, mediaUrls);
+                                }
+                            } else {
+                                console.warn(`📖 No content found in local README for ${project.title} at ${project.readme}`);
+                            }
+                        } catch (error) {
+                            console.warn(`Failed to load local README for ${project.title}:`, error);
+                        }
+                    }
+
+                    // If still no media and has local image, use that
+                    if (mediaUrls.length === 0 && project.image) {
+                        mediaUrls = [{
+                            url: project.image,
+                            alt: `${project.title} screenshot`,
+                            type: project.image.toLowerCase().includes('.gif') ? 'gif' : 'image'
+                        }];
+                        console.log(`🖼️ Using local image for ${project.title}: ${project.image}`);
+                    }
+                }
+
+                if (mediaUrls.length > 0) {
+                    // Cache media
+                    this.mediaCache.set(project.id, mediaUrls);
+
+                    // Update project card
+                    this.updateProjectCardMedia(project.id, mediaUrls);
+
+                    console.log(`📸 Updated ${project.title} with ${mediaUrls.length} media items`);
+                } else {
+                    console.log(`ℹ️ No media found for ${project.title}`);
+                }
+
+                // Small delay to avoid overwhelming the browser
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+            } catch (error) {
+                console.warn(`Failed to preload media for ${project.title}:`, error);
+            }
+        }
+
+        console.log('✅ Background media preloading completed');
+    }
+
     /**
      * Mark content as ready with visual indicator
      * @param {string} projectId - Project ID
@@ -612,6 +1146,14 @@ ${Object.entries(project.links).map(([type, url]) => `- [${type.charAt(0).toUppe
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.projectModal = new ProjectModal();
+
+    // Start background media preloading after a short delay
+    setTimeout(() => {
+        console.log('🕐 Starting media preload timer...');
+        console.log('📱 portfolioApp available:', !!window.portfolioApp);
+        console.log('📊 PROJECTS_DATA available:', !!window.PROJECTS_DATA);
+        window.projectModal.preloadAllProjectMedia();
+    }, 3000); // Wait 3 seconds to ensure portfolioApp is initialized
 });
 
 // Export for external use

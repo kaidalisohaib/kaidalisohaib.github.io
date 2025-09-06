@@ -18,8 +18,7 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/kaidalisohaib/mcgill-course-visualizer'
     },
-    image: 'assets/images/mcgill-course-visualizer.png',
-    year: 2024
+    year: 2025
   },
   {
     id: 'sumo-robot',
@@ -35,7 +34,6 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/cabbagecultist/Sumo',
     },
-    image: 'assets/images/sumo-robot.svg',
     year: 2025
   },
   {
@@ -54,7 +52,6 @@ const PROJECTS_DATA = [
       github: 'https://github.com/kaidalisohaib/AMCL-Visualization',
       documentation: 'https://kaidalisohaib.github.io/AMCL-Visualization/explanation.html'
     },
-    image: 'assets/images/amcl-preview.svg',
     year: 2024
   },
   {
@@ -71,7 +68,6 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/ParsaJafarian/replex'
     },
-    image: 'assets/images/replex.png',
     year: 2024
   },
   {
@@ -80,16 +76,15 @@ const PROJECTS_DATA = [
     description: 'AI-powered web platform to teach ASL using real-time gesture recognition (MediaPipe), interactive 3D hand models, and a gamified testing framework.',
     technologies: ['React', 'Next.js', 'MediaPipe', 'TensorFlow', 'AI/ML'],
     category: 'ai-ml',
-    featured: false,
+    featured: true,
     achievements: [
       { type: 'winner', text: '1st Place Hackathon', icon: 'fas fa-trophy' },
       { type: 'ai', text: 'AI Innovation', icon: 'fas fa-brain' }
     ],
     links: {
-      demo: 'https://sign-atlas.vercel.app',
+      demo: 'https://sign-atlas-git-sohaib-parsajafarians-projects.vercel.app/',
       github: 'https://github.com/ParsaJafarian/sign-atlas'
     },
-    image: 'assets/images/sign-atlas.png',
     year: 2024
   },
   {
@@ -104,10 +99,9 @@ const PROJECTS_DATA = [
       { type: 'xai', text: 'Explainable AI', icon: 'fas fa-comment-dots' }
     ],
     links: {
-      demo: 'https://kaidalisohaib.github.io/AICohortW24/website-related/',
+      demo: 'https://kaidalisohaib.github.io/AICohortW24/',
       github: 'https://github.com/kaidalisohaib/AICohortW24'
     },
-    image: 'assets/images/heart-disease-predictor.png',
     year: 2024
   },
   {
@@ -124,8 +118,7 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/kaidalisohaib/sandswitch'
     },
-    image: 'assets/images/sandswitch.png',
-    year: 2024
+    year: 2025
   },
   {
     id: '2d-place',
@@ -141,8 +134,7 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/kaidalisohaib/2d-place'
     },
-    image: 'assets/images/2d-place.png',
-    year: 2024
+    year: 2022
   },
   {
     id: 'nutrition-calculator',
@@ -158,7 +150,6 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/kaidalisohaib/DawHacks24'
     },
-    image: 'assets/images/nutrition-calculator.png',
     year: 2024
   },
   {
@@ -175,7 +166,6 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/kaidalisohaib/DAIJChallenge24'
     },
-    image: 'assets/images/data-journalism.png',
     year: 2024
   },
   {
@@ -184,7 +174,7 @@ const PROJECTS_DATA = [
     description: 'Desktop application using Java and OpenGL compute shaders to procedurally generate road networks by simulating the foraging behavior of slime mold on the GPU.',
     technologies: ['Java', 'OpenGL', 'GLSL', 'Compute Shaders', 'Simulation'],
     category: 'software',
-    featured: false,
+    featured: true,
     achievements: [
       { type: 'gpu', text: 'GPGPU Computing', icon: 'fas fa-server' },
       { type: 'procedural', text: 'Procedural Generation', icon: 'fas fa-infinity' }
@@ -192,7 +182,6 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/kaidalisohaib/GraphTrafficSim'
     },
-    image: 'assets/images/slime-mold-sim.png',
     year: 2023
   },
   {
@@ -209,7 +198,6 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/kaidalisohaib/OmnivoxCurrentSessionDocumentDownloader'
     },
-    image: 'assets/images/omnivox-downloader.png',
     year: 2023
   },
   {
@@ -227,7 +215,8 @@ const PROJECTS_DATA = [
       github: 'https://github.com/MotionCorrect/sqft-total-area-calculator'
     },
     image: 'assets/images/sqft-calculator.png',
-    year: 2023
+    readme: 'assets/readmes/sqft-calculator.md',
+    year: 2025
   },
   {
     id: 'aes-gcm-viewer',
@@ -244,6 +233,7 @@ const PROJECTS_DATA = [
       github: 'https://github.com/MotionCorrect/AES-GCM-16b-Decryption-Viewer'
     },
     image: 'assets/images/aes-gcm-viewer.png',
+    readme: 'assets/readmes/aes-gcm-viewer.md',
     year: 2023
   },
   {
@@ -260,8 +250,7 @@ const PROJECTS_DATA = [
       demo: 'https://kaidalisohaib.github.io/Pathfinding-Visualizer/',
       github: 'https://github.com/kaidalisohaib/Pathfinding-Visualizer'
     },
-    image: 'assets/images/pathfinding-visualizer.png',
-    year: 2023
+    year: 2021
   },
   {
     id: 'acronym-aggregator',
@@ -276,13 +265,12 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/kaidalisohaib/acronym-aggregator'
     },
-    image: 'assets/images/acronym-aggregator.png',
-    year: 2023
+    year: 2022
   },
   {
     id: 'algorithmic-practice',
     title: 'Algorithmic Problem Solving in Rust',
-    description: 'A collection of efficient solutions to problems from LeetCode and Advent of Code, implemented in Rust to master the language and core CS concepts.',
+    description: 'A collection of efficient solutions to problems from Advent of Code, implemented in Rust to master the language and core CS concepts.',
     technologies: ['Rust', 'Algorithms', 'Data Structures'],
     category: 'software',
     featured: false,
@@ -290,9 +278,8 @@ const PROJECTS_DATA = [
       { type: 'practice', text: 'Coding Practice', icon: 'fas fa-keyboard' }
     ],
     links: {
-      github: 'https://github.com/kaidalisohaib/Leetcode'
+      github: 'https://github.com/kaidalisohaib/AdventOfCode'
     },
-    image: 'assets/images/leetcode-aoc.png',
     year: 2023
   },
   {
@@ -308,7 +295,6 @@ const PROJECTS_DATA = [
     links: {
       github: 'https://github.com/kaidalisohaib/GameJamVanier2024'
     },
-    image: 'assets/images/gamejam-2024.png',
     year: 2024
   },
   {
@@ -325,7 +311,8 @@ const PROJECTS_DATA = [
       devpost: 'https://devpost.com/software/ducky-v2'
     },
     image: 'assets/images/line-follower.png',
-    year: 2023
+    readme: 'assets/readmes/line-follower.md',
+    year: 2025
   }
 ];
 
@@ -342,7 +329,7 @@ class PortfolioApp {
   init() {
     // Initialize mobile viewport height fix
     this.updateViewportHeight();
-    
+
     this.setupEventListeners();
     this.setupNavigation();
     this.setupScrollEffects();
@@ -396,7 +383,7 @@ class PortfolioApp {
         navToggle.setAttribute('aria-expanded', !isExpanded);
         navMenu?.setAttribute('aria-expanded', !isExpanded);
         navMenu?.classList.add('show-menu');
-        
+
         // Focus management
         if (!isExpanded) {
           navClose?.focus();
@@ -409,7 +396,7 @@ class PortfolioApp {
         navToggle?.setAttribute('aria-expanded', 'false');
         navMenu?.setAttribute('aria-expanded', 'false');
         navMenu?.classList.remove('show-menu');
-        
+
         // Return focus to toggle button
         navToggle?.focus();
       });
@@ -441,7 +428,7 @@ class PortfolioApp {
 
           // Update active link and ARIA
           this.updateActiveNavLink(link);
-          
+
           // Focus management for accessibility
           setTimeout(() => {
             targetElement.focus();
@@ -540,7 +527,7 @@ class PortfolioApp {
       if (navMenu?.classList.contains('show-menu')) {
         navMenu.classList.remove('show-menu');
       }
-      
+
       // Recalculate viewport height after orientation change
       setTimeout(() => {
         this.updateViewportHeight();
@@ -568,7 +555,7 @@ class PortfolioApp {
     // Fix for mobile browsers where 100vh doesn't account for address bar
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
-  
+
   }
 
   /**
@@ -660,23 +647,16 @@ class PortfolioApp {
 
     const linksHTML = learnMoreButton + externalLinksHTML;
 
-    // Generate WebP and fallback image sources
-    const webpSrc = project.image.replace(/\.(png|jpg|jpeg)$/i, '.webp');
-    const fallbackSrc = project.image;
-
     card.innerHTML = `
       <div class="project__img-container">
-        <picture>
-          <source srcset="${webpSrc}" type="image/webp">
-          <img 
-            data-src="${fallbackSrc}" 
-            alt="${project.title} project screenshot" 
-            class="project__img lazy-load"
-            loading="lazy"
-            width="400"
-            height="250"
-          >
-        </picture>
+        <img 
+          src="assets/images/project-placeholder.svg" 
+          alt="${project.title} project screenshot" 
+          class="project__img"
+          loading="lazy"
+          width="400"
+          height="250"
+        >
         <div class="project__img-overlay"></div>
         <div class="project__achievements" role="list" aria-label="Project achievements">
           ${achievementsHTML}
@@ -697,9 +677,8 @@ class PortfolioApp {
       </div>
     `;
 
-    // Setup lazy loading and error handling for the image
-    const img = card.querySelector('.project__img');
-    this.setupLazyLoading(img, project.title);
+    // The image will be replaced by the dynamic media system
+    // No need for lazy loading setup since we start with a placeholder
 
     return card;
   }
@@ -817,10 +796,10 @@ class PortfolioApp {
 
     // Initialize skills bars animation
     this.initializeSkillsBars();
-    
+
     // Setup header scroll effect
     this.setupHeaderScrollEffect();
-    
+
     // Setup scroll progress indicator
     this.setupScrollProgress();
   }
@@ -857,7 +836,7 @@ class PortfolioApp {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const scrollPercent = (scrollTop / docHeight) * 100;
-      
+
       progressIndicator.style.setProperty('--scroll-progress', `${Math.min(scrollPercent, 100)}%`);
     };
 
@@ -875,14 +854,14 @@ class PortfolioApp {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
-    
+
     document.body.appendChild(notification);
-    
+
     // Show notification
     setTimeout(() => {
       notification.classList.add('show');
     }, 100);
-    
+
     // Hide and remove notification
     setTimeout(() => {
       notification.classList.remove('show');
@@ -904,7 +883,7 @@ class PortfolioApp {
 
     // Update ARIA attributes
     header.setAttribute('aria-expanded', !isCurrentlyOpen);
-    
+
     // If clicking on an already open section, close it
     if (isCurrentlyOpen) {
       skillsContent.classList.remove('skills__open');
@@ -953,9 +932,9 @@ class PortfolioApp {
     announcement.setAttribute('aria-atomic', 'true');
     announcement.className = 'sr-only';
     announcement.textContent = message;
-    
+
     document.body.appendChild(announcement);
-    
+
     // Remove after announcement
     setTimeout(() => {
       document.body.removeChild(announcement);
@@ -1142,7 +1121,8 @@ class PortfolioApp {
    * Setup contact form functionality
    */
   setupContactForm() {
-    this.initContactForm();
+    // Contact form removed - using direct contact methods only
+    console.log('Contact form disabled - using direct contact methods');
   }
 
   /**
@@ -1245,200 +1225,9 @@ class PortfolioApp {
   }
 
   /**
-   * Contact Form Functionality
+   * Contact Methods - Simple direct contact links only
+   * No form submission needed for static GitHub Pages site
    */
-  initContactForm() {
-    const contactForm = document.getElementById('contact-form');
-    if (!contactForm) return;
-
-    // Form validation rules
-    const validationRules = {
-      name: {
-        required: true,
-        minLength: 2,
-        pattern: /^[a-zA-Z\s'-]+$/,
-        message: 'Please enter a valid name (letters, spaces, hyphens, and apostrophes only)'
-      },
-      email: {
-        required: true,
-        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-        message: 'Please enter a valid email address'
-      },
-      message: {
-        required: true,
-        minLength: 10,
-        maxLength: 1000,
-        message: 'Message must be between 10 and 1000 characters'
-      }
-    };
-
-    // Real-time validation
-    Object.keys(validationRules).forEach(fieldName => {
-      const field = contactForm.querySelector(`[name="${fieldName}"]`);
-      if (field) {
-        field.addEventListener('blur', () => this.validateField(field, validationRules[fieldName]));
-        field.addEventListener('input', () => this.clearFieldError(field));
-      }
-    });
-
-    // Form submission
-    contactForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.handleFormSubmission(contactForm, validationRules);
-    });
-  }
-
-  validateField(field, rules) {
-    const value = field.value.trim();
-    const fieldGroup = field.closest('.contact__form-group');
-    const errorElement = fieldGroup.querySelector('.contact__form-error');
-
-    // Clear previous states
-    fieldGroup.classList.remove('error', 'success');
-
-    // Required field validation
-    if (rules.required && !value) {
-      this.showFieldError(fieldGroup, errorElement, 'This field is required');
-      return false;
-    }
-
-    // Skip other validations if field is empty and not required
-    if (!value && !rules.required) {
-      return true;
-    }
-
-    // Minimum length validation
-    if (rules.minLength && value.length < rules.minLength) {
-      this.showFieldError(fieldGroup, errorElement, `Minimum ${rules.minLength} characters required`);
-      return false;
-    }
-
-    // Maximum length validation
-    if (rules.maxLength && value.length > rules.maxLength) {
-      this.showFieldError(fieldGroup, errorElement, `Maximum ${rules.maxLength} characters allowed`);
-      return false;
-    }
-
-    // Pattern validation
-    if (rules.pattern && !rules.pattern.test(value)) {
-      this.showFieldError(fieldGroup, errorElement, rules.message);
-      return false;
-    }
-
-    // Field is valid
-    fieldGroup.classList.add('success');
-    this.hideFieldError(errorElement);
-    return true;
-  }
-
-  showFieldError(fieldGroup, errorElement, message) {
-    fieldGroup.classList.add('error');
-    errorElement.textContent = message;
-    errorElement.classList.add('show');
-  }
-
-  hideFieldError(errorElement) {
-    errorElement.classList.remove('show');
-    setTimeout(() => {
-      errorElement.textContent = '';
-    }, 300);
-  }
-
-  clearFieldError(field) {
-    const fieldGroup = field.closest('.contact__form-group');
-    const errorElement = fieldGroup.querySelector('.contact__form-error');
-
-    fieldGroup.classList.remove('error');
-    this.hideFieldError(errorElement);
-  }
-
-  async handleFormSubmission(form, validationRules) {
-    const formData = new FormData(form);
-    const formButton = form.querySelector('.contact__form-button');
-    const formStatus = document.getElementById('form-status');
-
-    // Validate all fields
-    let isValid = true;
-    Object.keys(validationRules).forEach(fieldName => {
-      const field = form.querySelector(`[name="${fieldName}"]`);
-      if (field && !this.validateField(field, validationRules[fieldName])) {
-        isValid = false;
-      }
-    });
-
-    if (!isValid) {
-      this.showFormStatus(formStatus, 'Please correct the errors above', 'error');
-      return;
-    }
-
-    // Show loading state
-    formButton.classList.add('loading');
-    formButton.disabled = true;
-
-    try {
-      // Simulate form submission (replace with actual endpoint)
-      await this.submitContactForm(formData);
-
-      // Success
-      this.showFormStatus(formStatus, 'Thank you! Your message has been sent successfully. I\'ll get back to you soon!', 'success');
-      form.reset();
-
-      // Clear all field states
-      form.querySelectorAll('.contact__form-group').forEach(group => {
-        group.classList.remove('error', 'success');
-      });
-
-    } catch (error) {
-      console.error('Form submission error:', error);
-      this.showFormStatus(formStatus, 'Sorry, there was an error sending your message. Please try again or contact me directly.', 'error');
-    } finally {
-      // Remove loading state
-      formButton.classList.remove('loading');
-      formButton.disabled = false;
-    }
-  }
-
-  async submitContactForm(formData) {
-    // For now, simulate a successful submission
-    // In a real implementation, you would send this to your backend or a service like Formspree, Netlify Forms, etc.
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Simulate success (90% of the time)
-        if (Math.random() > 0.1) {
-          resolve({ success: true });
-        } else {
-          reject(new Error('Simulated network error'));
-        }
-      }, 2000);
-    });
-
-    // Example implementation with Formspree:
-    /*
-    const response = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    
-    return response.json();
-    */
-  }
-
-  showFormStatus(statusElement, message, type) {
-    statusElement.textContent = message;
-    statusElement.className = `contact__form-status show ${type}`;
-
-    // Auto-hide after 8 seconds
-    setTimeout(() => {
-      statusElement.classList.remove('show');
-    }, 8000);
-  }
 }
 
 // Initialize the application when DOM is ready
@@ -1451,3 +1240,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Export for external use
 window.PortfolioApp = PortfolioApp;
+window.PROJECTS_DATA = PROJECTS_DATA;

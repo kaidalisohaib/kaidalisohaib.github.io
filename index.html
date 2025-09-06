@@ -985,138 +985,80 @@
         <section class="contact section" id="contact">
             <div class="contact__container container">
                 <h2 class="section__title fade-in">Get In Touch</h2>
-                <span class="section__subtitle fade-in">Let's Connect</span>
+                <span class="section__subtitle fade-in">Let's Connect & Collaborate</span>
 
-                <div class="contact__content grid">
-                    <!-- Contact Information -->
-                    <div class="contact__info fade-in">
-                        <h3 class="contact__info-title">Contact Information</h3>
-                        <p class="contact__info-description">
-                            I'm always open to discussing new opportunities, innovative projects,
-                            or collaborations. Feel free to reach out!
+                <div class="contact__content">
+                    <!-- Main Contact Card -->
+                    <div class="contact__card fade-in">
+                        <div class="contact__header">
+                            <div class="contact__avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="contact__intro">
+                                <h3 class="contact__name">Sohaib Kaidali</h3>
+                                <p class="contact__role">Computer Engineering Student</p>
+                                <div class="contact__status">
+                                    <div class="contact__status-dot"></div>
+                                    <span>Available for internships & opportunities</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="contact__description">
+                            I'm passionate about robotics, AI/ML, and full-stack development.
+                            Always excited to discuss innovative projects and collaboration opportunities!
                         </p>
 
-                        <div class="contact__details">
-                            <!-- Email -->
-                            <div class="contact__detail">
-                                <div class="contact__detail-icon">
+                        <!-- Contact Methods -->
+                        <div class="contact__methods">
+                            <a href="mailto:sohaib.kaidali@mail.mcgill.ca"
+                                class="contact__method contact__method--primary">
+                                <div class="contact__method-icon">
                                     <i class="fas fa-envelope"></i>
                                 </div>
-                                <div class="contact__detail-content">
-                                    <h4 class="contact__detail-title">Email</h4>
-                                    <a href="mailto:sohaib.kaidali@mail.mcgill.ca" class="contact__detail-link">
-                                        sohaib.kaidali@mail.mcgill.ca
-                                    </a>
+                                <div class="contact__method-info">
+                                    <span class="contact__method-label">Email</span>
+                                    <span class="contact__method-value">sohaib.kaidali@mail.mcgill.ca</span>
                                 </div>
-                            </div>
+                                <i class="fas fa-arrow-right contact__method-arrow"></i>
+                            </a>
 
-                            <!-- LinkedIn -->
-                            <div class="contact__detail">
-                                <div class="contact__detail-icon">
-                                    <i class="fab fa-linkedin-in"></i>
+                            <a href="https://linkedin.com/in/sohaib-kaidali" target="_blank" rel="noopener noreferrer"
+                                class="contact__method">
+                                <div class="contact__method-icon">
+                                    <i class="fab fa-linkedin"></i>
                                 </div>
-                                <div class="contact__detail-content">
-                                    <h4 class="contact__detail-title">LinkedIn</h4>
-                                    <a href="https://linkedin.com/in/sohaib-kaidali" class="contact__detail-link"
-                                        target="_blank" rel="noopener noreferrer">
-                                        linkedin.com/in/sohaib-kaidali
-                                    </a>
+                                <div class="contact__method-info">
+                                    <span class="contact__method-label">LinkedIn</span>
+                                    <span class="contact__method-value">Professional networking</span>
                                 </div>
-                            </div>
+                                <i class="fas fa-external-link-alt contact__method-arrow"></i>
+                            </a>
 
-                            <!-- GitHub -->
-                            <div class="contact__detail">
-                                <div class="contact__detail-icon">
+                            <a href="https://github.com/kaidalisohaib" target="_blank" rel="noopener noreferrer"
+                                class="contact__method">
+                                <div class="contact__method-icon">
                                     <i class="fab fa-github"></i>
                                 </div>
-                                <div class="contact__detail-content">
-                                    <h4 class="contact__detail-title">GitHub</h4>
-                                    <a href="https://github.com/kaidalisohaib" class="contact__detail-link"
-                                        target="_blank" rel="noopener noreferrer">
-                                        github.com/kaidalisohaib
-                                    </a>
+                                <div class="contact__method-info">
+                                    <span class="contact__method-label">GitHub</span>
+                                    <span class="contact__method-value">Code collaboration</span>
                                 </div>
-                            </div>
-
-                            <!-- Location -->
-                            <div class="contact__detail">
-                                <div class="contact__detail-icon">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </div>
-                                <div class="contact__detail-content">
-                                    <h4 class="contact__detail-title">Location</h4>
-                                    <span class="contact__detail-text">Montreal, QC, Canada</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Availability Status -->
-                        <div class="contact__availability">
-                            <div class="contact__availability-indicator">
-                                <div class="contact__availability-dot"></div>
-                                <span class="contact__availability-text">Available for internships and
-                                    opportunities</span>
-                            </div>
-                        </div>
-
-                        <!-- Social Links -->
-                        <div class="contact__social">
-                            <a href="https://github.com/kaidalisohaib" class="contact__social-link" target="_blank"
-                                rel="noopener noreferrer" aria-label="GitHub Profile">
-                                <i class="fab fa-github"></i>
-                            </a>
-                            <a href="https://linkedin.com/in/sohaib-kaidali" class="contact__social-link"
-                                target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile">
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
-                            <a href="mailto:sohaib.kaidali@mail.mcgill.ca" class="contact__social-link"
-                                aria-label="Email Contact">
-                                <i class="fas fa-envelope"></i>
+                                <i class="fas fa-external-link-alt contact__method-arrow"></i>
                             </a>
                         </div>
-                    </div>
 
-                    <!-- Contact Form -->
-                    <div class="contact__form-container slide-in-right">
-                        <h3 class="contact__form-title">Send me a message</h3>
-                        <form class="contact__form" id="contact-form" novalidate>
-                            <div class="contact__form-group">
-                                <label for="contact-name" class="contact__form-label">Name *</label>
-                                <input type="text" id="contact-name" name="name" class="contact__form-input"
-                                    placeholder="Your full name" required aria-describedby="name-error">
-                                <span class="contact__form-error" id="name-error" role="alert"></span>
+                        <!-- Quick Info -->
+                        <div class="contact__footer">
+                            <div class="contact__info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Montreal, Canada (EST)</span>
                             </div>
-
-                            <div class="contact__form-group">
-                                <label for="contact-email" class="contact__form-label">Email *</label>
-                                <input type="email" id="contact-email" name="email" class="contact__form-input"
-                                    placeholder="your.email@example.com" required aria-describedby="email-error">
-                                <span class="contact__form-error" id="email-error" role="alert"></span>
+                            <div class="contact__info-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Responds within 24 hours</span>
                             </div>
-
-                            <div class="contact__form-group">
-                                <label for="contact-subject" class="contact__form-label">Subject</label>
-                                <input type="text" id="contact-subject" name="subject" class="contact__form-input"
-                                    placeholder="What's this about?">
-                            </div>
-
-                            <div class="contact__form-group">
-                                <label for="contact-message" class="contact__form-label">Message *</label>
-                                <textarea id="contact-message" name="message"
-                                    class="contact__form-input contact__form-textarea"
-                                    placeholder="Tell me about your project, opportunity, or just say hello!" rows="6"
-                                    required aria-describedby="message-error"></textarea>
-                                <span class="contact__form-error" id="message-error" role="alert"></span>
-                            </div>
-
-                            <button type="submit" class="button button--flex contact__form-button">
-                                <span class="contact__form-button-text">Send Message</span>
-                                <i class="fas fa-paper-plane button__icon"></i>
-                            </button>
-
-                            <!-- Form Status Messages -->
-                            <div class="contact__form-status" id="form-status" role="status" aria-live="polite"></div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>

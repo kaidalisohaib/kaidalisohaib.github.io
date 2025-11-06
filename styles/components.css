@@ -1760,7 +1760,7 @@
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(79, 70, 229, 0.1);
-  cursor: pointer;
+  /* cursor: pointer; */
   opacity: 1;
   transform: scale(1);
   display: flex;
@@ -4223,7 +4223,7 @@
 
 /* Enhanced project card interactions */
 .project__card {
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 
 .project__card:focus {

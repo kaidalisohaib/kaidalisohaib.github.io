@@ -306,7 +306,7 @@
         <section class="about section" id="about">
             <div class="about__container container">
                 <h2 class="section__title fade-in">About Me</h2>
-                <span class="section__subtitle fade-in">My Introduction</span>
+                <span class="section__subtitle fade-in">What Drives Me</span>
 
                 <div class="about__data grid">
                     <div class="about__info fade-in">
@@ -334,6 +334,25 @@
                                 Download CV
                                 <i class="fas fa-download button__icon"></i>
                             </a>
+                        </div>
+
+                        <div class="about__stats fade-in">
+                            <div class="about__stat-item">
+                                <span class="about__stat-number">18+</span>
+                                <span class="about__stat-label">Projects</span>
+                            </div>
+                            <div class="about__stat-item">
+                                <span class="about__stat-number">3×</span>
+                                <span class="about__stat-label">1st Place</span>
+                            </div>
+                            <div class="about__stat-item">
+                                <span class="about__stat-number">3</span>
+                                <span class="about__stat-label">Languages</span>
+                            </div>
+                            <div class="about__stat-item">
+                                <span class="about__stat-number">10+</span>
+                                <span class="about__stat-label">Technologies</span>
+                            </div>
                         </div>
                     </div>
 
@@ -445,16 +464,15 @@
 
                                 <div class="skills__list grid-condensed" id="robotics-embedded-list">
                                     <!-- Highlighted your specialized robotics skills from projects and resume -->
-                                    <div class="skills__data-simple"><span class="skills__name">ROS2 (Basics)</span>
-                                    </div>
+                                    <div class="skills__data-simple"><span class="skills__name">ROS 2</span></div>
                                     <div class="skills__data-simple"><span class="skills__name">Embedded C/C++</span>
                                     </div>
-                                    <div class="skills__data-simple"><span class="skills__name">ESP32 & Arduino</span>
+                                    <div class="skills__data-simple"><span class="skills__name">ESP32 &amp;
+                                            Arduino</span>
                                     </div>
-                                    <div class="skills__data-simple"><span class="skills__name">WPILib</span></div>
+                                    <div class="skills__data-simple"><span class="skills__name">CUDA</span></div>
                                     <div class="skills__data-simple"><span class="skills__name">PID Control</span></div>
-                                    <div class="skills__data-simple"><span class="skills__name">I²C Debugging</span>
-                                    </div>
+                                    <div class="skills__data-simple"><span class="skills__name">Isaac Sim</span></div>
                                 </div>
                             </div>
 
@@ -493,7 +511,7 @@
         <section class="projects section" id="projects">
             <div class="projects__container container">
                 <h2 class="section__title fade-in">Featured Projects</h2>
-                <span class="section__subtitle fade-in">My Recent Work</span>
+                <span class="section__subtitle fade-in">Things I've Built</span>
 
                 <!-- Project Filters -->
                 <div class="projects__filters fade-in">
@@ -512,6 +530,9 @@
                     <button type="button" class="projects__filter-btn" data-filter="algorithms">
                         Algorithms
                     </button>
+                    <button type="button" class="projects__filter-btn" data-filter="software">
+                        Software
+                    </button>
                 </div>
 
                 <!-- Projects Grid -->
@@ -525,20 +546,20 @@
         <section class="experience section" id="experience">
             <div class="experience__container container">
                 <h2 class="section__title fade-in">Experience &amp; Education</h2>
-                <span class="section__subtitle fade-in">My Professional Journey</span>
+                <span class="section__subtitle fade-in">Where I've Been &amp; What I've Built</span>
 
                 <div class="timeline">
                     <div class="timeline__line"></div>
 
-                    <!-- FIRST Robotics Experience -->
+                    <!-- McGill Robotics AUV -->
                     <article class="timeline__item timeline__item--left fade-in">
                         <div class="timeline__marker">
-                            <i class="fas fa-robot"></i>
+                            <i class="fas fa-water"></i>
                         </div>
                         <div class="timeline__content">
                             <div class="timeline__header">
-                                <h3 class="timeline__title">Captain, Pilot, and Lead Developer</h3>
-                                <h4 class="timeline__company">FIRST Robotics Team 3986 - Express-O</h4>
+                                <h3 class="timeline__title">Software Team Member</h3>
+                                <h4 class="timeline__company">McGill Robotics — AUV Design Team</h4>
                                 <div class="timeline__meta">
                                     <span class="timeline__location">
                                         <i class="fas fa-map-marker-alt"></i>
@@ -546,46 +567,43 @@
                                     </span>
                                     <span class="timeline__period">
                                         <i class="fas fa-calendar-alt"></i>
-                                        Jan. 2020 – Jun. 2022
+                                        Sept. 2025 – Present
                                     </span>
                                 </div>
                             </div>
                             <div class="timeline__description">
-                                <p>Led a championship-winning robotics team through technical innovation and strategic
-                                    leadership, combining advanced engineering with competitive excellence.</p>
+                                <p>Building the full autonomy stack for an underwater vehicle — from perception and
+                                    state estimation to simulation and controls.</p>
                             </div>
                             <div class="timeline__achievements">
-                                <h5 class="timeline__achievements-title">Key Achievements</h5>
+                                <h5 class="timeline__achievements-title">Key Contributions</h5>
                                 <ul class="timeline__achievements-list">
                                     <li>
-                                        <i class="fas fa-trophy"></i>
-                                        <span>Led team to <strong>2023 Montreal Regional Championship</strong> victory
-                                            &amp;
-                                            World's Qualifier</span>
-                                    </li>
-                                    <li>
-                                        <i class="fas fa-cogs"></i>
-                                        <span>Engineered advanced <strong>motor control system</strong> with PID and
-                                            feedforward control</span>
-                                    </li>
-                                    <li>
                                         <i class="fas fa-eye"></i>
-                                        <span>Designed <strong>computer vision pipeline</strong> using OpenCV for robot
-                                            localization</span>
+                                        <span>Engineered a <strong>3D vision pipeline</strong> using YOLO + ZED SDK with
+                                            EKF filtering for real-time object mapping</span>
                                     </li>
                                     <li>
-                                        <i class="fas fa-dollar-sign"></i>
-                                        <span>Secured <strong>$5,000 annual grant</strong> and <strong>$2,000
-                                                scholarship</strong></span>
+                                        <i class="fas fa-compass"></i>
+                                        <span>Developed <strong>state estimation &amp; controls</strong> — fusing DVL,
+                                            IMU, and VIO via EKF with PID/quaternion controllers driven by a PyTree
+                                            behaviour tree</span>
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-gamepad"></i>
+                                        <span>Designed a <strong>Unity simulation</strong> environment connected to the
+                                            ROS 2 codebase via TCP for full-stack validation</span>
                                     </li>
                                 </ul>
                             </div>
                             <div class="timeline__technologies">
-                                <span class="timeline__tech-tag">Java</span>
-                                <span class="timeline__tech-tag">WPILib</span>
-                                <span class="timeline__tech-tag">PID Control</span>
+                                <span class="timeline__tech-tag">ROS 2</span>
+                                <span class="timeline__tech-tag">Python</span>
+                                <span class="timeline__tech-tag">C++</span>
+                                <span class="timeline__tech-tag">Docker</span>
+                                <span class="timeline__tech-tag">Unity</span>
+                                <span class="timeline__tech-tag">CUDA</span>
                                 <span class="timeline__tech-tag">OpenCV</span>
-                                <span class="timeline__tech-tag">Leadership</span>
                             </div>
                         </div>
                     </article>
@@ -597,7 +615,7 @@
                         </div>
                         <div class="timeline__content">
                             <div class="timeline__header">
-                                <h3 class="timeline__title">Software Development Consultant Intern</h3>
+                                <h3 class="timeline__title">Software Engineer Consultant Intern</h3>
                                 <h4 class="timeline__company">MotionCorrect, Inc.</h4>
                                 <div class="timeline__meta">
                                     <span class="timeline__location">
@@ -611,35 +629,35 @@
                                 </div>
                             </div>
                             <div class="timeline__description">
-                                <p>Driving significant performance improvements and streamlining development workflows
-                                    by optimizing CI/CD pipelines and automating Git processes.</p>
+                                <p>Architecting full-stack browser extensions, optimizing CI/CD pipelines, and
+                                    automating development workflows.</p>
                             </div>
                             <div class="timeline__achievements">
                                 <h5 class="timeline__achievements-title">Key Achievements</h5>
                                 <ul class="timeline__achievements-list">
                                     <li>
+                                        <i class="fas fa-puzzle-piece"></i>
+                                        <span>Architected full-stack <strong>browser extensions</strong>
+                                            (Chrome/Firefox) with a Rust backend and performant JS frontend</span>
+                                    </li>
+                                    <li>
                                         <i class="fas fa-rocket"></i>
-                                        <span>Reduced CI/CD build time from <strong>2 hours to 20 minutes</strong> (83%
-                                            improvement)</span>
+                                        <span>Optimized CI/CD pipelines, reducing build times by <strong>80%</strong> (2
+                                            hrs → 20 mins) via caching and job parallelization</span>
                                     </li>
                                     <li>
                                         <i class="fas fa-cogs"></i>
-                                        <span>Automated Git workflows, enhancing development cycle efficiency and team
-                                            productivity</span>
-                                    </li>
-                                    <li>
-                                        <i class="fas fa-shield-alt"></i>
-                                        <span>Enforced software development best practices through rigorous code
-                                            reviews</span>
+                                        <span>Automated Git workflows and led code reviews to improve velocity and
+                                            reduce post-deployment bugs</span>
                                     </li>
                                 </ul>
                             </div>
                             <div class="timeline__technologies">
+                                <span class="timeline__tech-tag">Rust</span>
+                                <span class="timeline__tech-tag">JavaScript</span>
                                 <span class="timeline__tech-tag">CI/CD</span>
                                 <span class="timeline__tech-tag">Docker</span>
-                                <span class="timeline__tech-tag">Git Automation</span>
                                 <span class="timeline__tech-tag">DevOps</span>
-                                <span class="timeline__tech-tag">Python</span>
                             </div>
                         </div>
                     </article>
@@ -651,7 +669,7 @@
                         </div>
                         <div class="timeline__content">
                             <div class="timeline__header">
-                                <h3 class="timeline__title">Mechanics Laboratory Assistant</h3>
+                                <h3 class="timeline__title">Teaching Assistant</h3>
                                 <h4 class="timeline__company">Vanier College</h4>
                                 <div class="timeline__meta">
                                     <span class="timeline__location">
@@ -660,7 +678,7 @@
                                     </span>
                                     <span class="timeline__period">
                                         <i class="fas fa-calendar-alt"></i>
-                                        Aug. 2023 - Dec 2023
+                                        Aug. 2023 – Dec. 2023
                                     </span>
                                 </div>
                             </div>
@@ -693,6 +711,63 @@
                                 <span class="timeline__tech-tag">Problem-Solving</span>
                                 <span class="timeline__tech-tag">Physics</span>
                                 <span class="timeline__tech-tag">Technical Support</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- FIRST Robotics Experience -->
+                    <article class="timeline__item timeline__item--left fade-in">
+                        <div class="timeline__marker">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="timeline__content">
+                            <div class="timeline__header">
+                                <h3 class="timeline__title">Robotics Software Lead &amp; Drive Team Captain</h3>
+                                <h4 class="timeline__company">FIRST Robotics Team 3986 - Express-O</h4>
+                                <div class="timeline__meta">
+                                    <span class="timeline__location">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        Montreal, QC
+                                    </span>
+                                    <span class="timeline__period">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        Jan. 2020 – Jun. 2022
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="timeline__description">
+                                <p>Led a championship-winning robotics team through technical innovation and strategic
+                                    leadership, combining advanced engineering with competitive excellence.</p>
+                            </div>
+                            <div class="timeline__achievements">
+                                <h5 class="timeline__achievements-title">Key Achievements</h5>
+                                <ul class="timeline__achievements-list">
+                                    <li>
+                                        <i class="fas fa-trophy"></i>
+                                        <span>Led team to <strong>2022 Montreal Regional Championship</strong> victory
+                                            &amp;
+                                            World Championship qualification</span>
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-eye"></i>
+                                        <span>Designed <strong>computer vision</strong> system (OpenCV) for localization
+                                            and a
+                                            <strong>PID/feedforward controller</strong> that boosted motor precision by
+                                            20%</span>
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <span>Secured <strong>$7,000+</strong> in grants for leadership in STEM
+                                            outreach</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="timeline__technologies">
+                                <span class="timeline__tech-tag">Java</span>
+                                <span class="timeline__tech-tag">WPILib</span>
+                                <span class="timeline__tech-tag">PID Control</span>
+                                <span class="timeline__tech-tag">OpenCV</span>
+                                <span class="timeline__tech-tag">Leadership</span>
                             </div>
                         </div>
                     </article>
@@ -1091,7 +1166,7 @@
             </div>
 
             <div class="footer__copy">
-                <p>&amp;copy; 2025 Sohaib Kaidali. All rights reserved.</p>
+                <p>&copy; 2026 Sohaib Kaidali. All rights reserved.</p>
             </div>
         </div>
     </footer>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One walking policy for five robots — Sohaib Kaidali</title>
+<meta name="description" content="One PPO policy that walks Cassie, Digit, Unitree G1, H1 and H2. Adding a 31-joint humanoid, deriving motor gains from physics, and removing the exploits the policy found.">
+<meta name="author" content="Sohaib Kaidali">
+<link rel="canonical" href="https://kaidalisohaib.github.io/work/one-policy-five-robots.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="One walking policy for five robots — Sohaib Kaidali">
+<meta property="og:description" content="One PPO policy that walks Cassie, Digit, Unitree G1, H1 and H2. Adding a 31-joint humanoid, deriving motor gains from physics, and removing the exploits the policy found.">
+<meta property="og:url" content="https://kaidalisohaib.github.io/work/one-policy-five-robots.html">
+<meta property="og:image" content="https://kaidalisohaib.github.io/assets/media/hetero-five-bipeds.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#fbfaf6">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}})()</script>
+<link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="me" href="/">Sohaib Kaidali</a>
+  <nav aria-label="Main">
+    <a href="/#work">Work</a>
+    <a href="/#experience" class="opt">Experience</a>
+    <a href="/#about" class="opt">About</a>
+    <a href="/assets/documents/Sohaib_Kaidali_CV_2026.pdf">CV</a>
+    <a href="mailto:kaidalisohaib@gmail.com">Contact</a>
+  </nav>
+  <button class="theme" type="button" aria-label="Switch between light and dark theme" title="Light / dark">◐</button>
+</div></header>
+<main id="main">
+<div class="cs-head"><div class="wrap">
+  <p class="crumb"><a href="/#work">← All work</a> &nbsp;·&nbsp; <span class="label">McGill Mobile Robotics Lab</span></p>
+  <h1>Can one neural network walk five different robots?</h1>
+  <p class="answer">Yes. One policy drives five two-legged robots with 12 to 31 joints. My part was the shared network design for bipeds, adding the Unitree H2, and fixing the ways it learned to cheat.</p>
+  <dl class="meta"><div><dt>My role</dt><dd>Contributor to the lab's Hetero-IsaacLab code: biped environment and H2 integration</dd></div><div><dt>When</dt><dd>2026</dd></div><div><dt>Stack</dt><dd>Isaac Lab, RSL-RL (PPO), PyTorch</dd></div><div><dt>Code</dt><dd><a href="https://github.com/kaidalisohaib/Hetero-IsaacLab">GitHub</a></dd></div></dl>
+</div></div>
+<article class="cs">
+
+<figure class="wide"><div class="frame"><video data-auto muted loop playsinline preload="none" poster="/assets/media/hetero-five-bipeds.jpg" aria-label="Five different two-legged robots walking in simulation under one policy"><source src="/assets/media/hetero-five-bipeds.mp4" type="video/mp4"></video></div><figcaption>Cassie, Digit, G1, H1 and H2 in the same simulation, all driven by the same network. Arrows show commanded and actual velocity.</figcaption></figure>
+
+<h2>The problem</h2>
+<p>A walking policy is normally trained for one robot. Change the robot and you start over. If one network could walk many bodies, a new robot could start from what the others already know.</p>
+<p>The difficulty is that the bodies don't match. Cassie has 12 motors and no arms. The H2 has 31. A network has a fixed number of inputs and outputs.</p>
+
+<h2>What I built</h2>
+<h3>One layout that fits every robot</h3>
+<p>I mapped every robot's joints onto one shared list ("left knee" means the same slot on all of them). A robot that lacks a joint leaves its slot empty. A masked network (MaskedMLP) ignores empty inputs and blocks learning signals from empty outputs, so a robot without arms doesn't teach the network anything wrong about arms.</p>
+<h3>Adding the H2</h3>
+<p>The H2 is the newest and largest robot in the set. Its first training runs failed in three ways:</p>
+<ul>
+  <li><b>It leaned 62° forward.</b> Leaning that far earned speed reward while it caught itself with its arms and knees. A stronger upright term removed it.</li>
+  <li><b>It was punished 2.6 times harder than Cassie.</b> Penalties were summed over joints, and the H2 has 2.6 times as many. Its penalties drowned out the reward for walking. I rescaled them per robot.</li>
+  <li><b>It kept being reset for no reason.</b> The pelvis sits low and brushed small bumps, which counted as a fall, about 45 times per training iteration. I moved the fall check to the torso.</li>
+</ul>
+<h3>Motor gains from physics, not from guessing</h3>
+<p>Each joint has a stiffness and damping setting. Instead of hand-tuning 31 pairs, I computed them from each motor's inertia, with a target response speed and damping, inside the limits the real motor can deliver. With that and a symmetry reward, the difference between left and right steps fell from 17.5% to 4.0%.</p>
+<h3>A crash that only showed up after hours</h3>
+<p>Training occasionally died with NaN values. The cause was an angle computed with arccos, whose slope is infinite when two orientations are identical. I replaced it with a distance that has no such point.</p>
+<figure><div class="frame"><video data-auto muted loop playsinline preload="none" poster="/assets/media/hetero-h2-stairs.jpg" aria-label="Many H2 humanoids walking over stair-like terrain in simulation"><source src="/assets/media/hetero-h2-stairs.mp4" type="video/mp4"></video></div><figcaption>The H2 on rough terrain after the fixes.</figcaption></figure>
+
+<h2>Results</h2>
+<table>
+  <tr><th>Measure</th><th class="num">Before</th><th class="num">After</th></tr>
+  <tr><td>Left/right step difference (H2)</td><td class="num">17.5%</td><td class="num">4.0%</td></tr>
+  <tr><td>Forward lean (H2)</td><td class="num">62°</td><td class="num">upright</td></tr>
+  <tr><td>False "fell over" resets per training iteration</td><td class="num">~45</td><td class="num">0</td></tr>
+  <tr><td>Robots on one policy</td><td class="num">4</td><td class="num">5</td></tr>
+</table>
+
+<h2>What I learned</h2>
+<ul>
+  <li>A policy optimizes the reward you wrote, not the one you meant. Watch the video before reading the curve.</li>
+  <li>When robots share a reward, anything summed over joints quietly favours the small robot.</li>
+  <li>Reset rules are part of the task. A wrong one can stop learning without any error message.</li>
+</ul>
+<p>This walking work is what the <a href="/work/h2-pole.html">pole-balancing project</a> was built on.</p>
+<p class="next"><a href="/work/h2-pole.html">← Pole on a walking humanoid</a><a href="/work/underwater-robot.html">Underwater robot →</a></p>
+</article>
+</main>
+<footer class="contact" id="contact"><div class="wrap">
+  <p class="label">Contact</p>
+  <h2>I'm looking for a robotics or robot-learning internship for summer 2027.</h2>
+  <div class="cta">
+    <a class="btn primary" href="mailto:kaidalisohaib@gmail.com">kaidalisohaib@gmail.com</a>
+    <a class="btn" href="https://www.linkedin.com/in/sohaib-kaidali">LinkedIn</a>
+    <a class="btn" href="https://github.com/kaidalisohaib">GitHub</a>
+    <a class="btn" href="/assets/documents/Sohaib_Kaidali_CV_2026.pdf">CV (PDF)</a>
+  </div>
+  <p class="fine"><span>© 2026 Sohaib Kaidali</span></p>
+</div></footer>
+<script src="/assets/js/site.js" defer></script>
+</body>
+</html>

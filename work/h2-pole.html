@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balancing a free pole on a walking humanoid — Sohaib Kaidali</title>
+<meta name="description" content="A 31-joint whole-body controller for the Unitree H2: a classical balance controller in the arm with reinforcement learning on top. 99.0% success walking over 1,024 simulated test episodes.">
+<meta name="author" content="Sohaib Kaidali">
+<link rel="canonical" href="https://kaidalisohaib.github.io/work/h2-pole.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Balancing a free pole on a walking humanoid — Sohaib Kaidali">
+<meta property="og:description" content="A 31-joint whole-body controller for the Unitree H2: a classical balance controller in the arm with reinforcement learning on top. 99.0% success walking over 1,024 simulated test episodes.">
+<meta property="og:url" content="https://kaidalisohaib.github.io/work/h2-pole.html">
+<meta property="og:image" content="https://kaidalisohaib.github.io/assets/media/h2-walk-side.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#fbfaf6">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}})()</script>
+<link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="me" href="/">Sohaib Kaidali</a>
+  <nav aria-label="Main">
+    <a href="/#work">Work</a>
+    <a href="/#experience" class="opt">Experience</a>
+    <a href="/#about" class="opt">About</a>
+    <a href="/assets/documents/Sohaib_Kaidali_CV_2026.pdf">CV</a>
+    <a href="mailto:kaidalisohaib@gmail.com">Contact</a>
+  </nav>
+  <button class="theme" type="button" aria-label="Switch between light and dark theme" title="Light / dark">◐</button>
+</div></header>
+<main id="main">
+<div class="cs-head"><div class="wrap">
+  <p class="crumb"><a href="/#work">← All work</a> &nbsp;·&nbsp; <span class="label">Mila · McGill Mobile Robotics Lab</span></p>
+  <h1>Can a humanoid balance a free pole on its palm while it walks, using only its head camera?</h1>
+  <p class="answer">Yes, in simulation: the pole stays up in 99.0% of walking episodes and 98.8% of standing ones. Getting there took a classical balance controller, a learned estimator, and a lot of tests designed to catch me fooling myself. The real robot is next.</p>
+  <dl class="meta"><div><dt>My role</dt><dd>Research assistant. I designed, trained and evaluated the controller.</dd></div><div><dt>When</dt><dd>May 2026 – now</dd></div><div><dt>Stack</dt><dd>Isaac Lab, PyTorch, PPO, MuJoCo, Unitree DDS</dd></div><div><dt>Status</dt><dd>Works in two simulators. Hardware tests planned this winter.</dd></div></dl>
+</div></div>
+<article class="cs">
+
+<figure class="wide"><div class="pair">
+  <div class="frame"><video data-auto muted loop playsinline preload="none" poster="/assets/media/h2-walk-side.jpg" aria-label="Side view of the simulated H2 walking with a pole balanced on its palm"><source src="/assets/media/h2-walk-side.mp4" type="video/mp4"></video></div>
+  <div class="frame"><video data-auto muted loop playsinline preload="none" poster="/assets/media/h2-hand.jpg" aria-label="Close-up of the robot hand moving under the base of the pole"><source src="/assets/media/h2-hand.mp4" type="video/mp4"></video></div>
+</div><figcaption>Left: walking at 0.3 m/s. Right: the palm from close up. The pole is not attached or gripped; it stands on the open hand.</figcaption></figure>
+
+<h2>The problem</h2>
+<p>Balancing a broomstick on your palm is easy to describe and hard to do. The stick is always falling, and the only fix is to keep moving your hand under it. Now do it while walking, when every step shakes the hand.</p>
+<p>For the robot there are three more constraints:</p>
+<ul>
+  <li><b>The pole is free.</b> It is 1.5 m long and stands on an open palm. Nothing clamps it.</li>
+  <li><b>The robot only sees it through its head camera.</b> There is no sensor on the pole. The camera is noisy, slow, and sometimes wrong.</li>
+  <li><b>One controller moves all 31 joints.</b> The legs have to walk without shaking the arm more than the arm can correct.</li>
+</ul>
+<p>It's a good research task because it can't be faked. A robot that carries a box can be stiff and slow. A pole falls in under a second if the estimate or the reaction is off.</p>
+
+<h2>What I built</h2>
+<h3>Pure reinforcement learning didn't work</h3>
+<p>The first plan was the usual one: reward the robot for keeping the pole up and let it learn everything. It learned to stand with the pole. It never learned to walk with it: 0.2% of walking episodes succeeded.</p>
+<h3>A classical controller underneath, learning on top</h3>
+<p>Pole balancing is a textbook control problem with a known solution (LQR). So I put that solution inside the arm, with inverse kinematics to turn "move the palm here" into joint angles. The learned policy then only has to add corrections for what the simple model gets wrong, and make the legs cooperate. This is called residual reinforcement learning.</p>
+<div class="flow">
+  <div><b>Head camera</b><span>stereo images, noisy and delayed</span></div>
+  <div class="rl"><b>Estimator</b><span>pole lean and lean rate; learned, with a Kalman filter</span></div>
+  <div class="mb"><b>LQR + inverse kinematics</b><span>where the palm should go</span></div>
+  <div class="rl"><b>PPO policy</b><span>corrections for the arm, and the whole walking gait</span></div>
+  <div><b>31 joints</b><span>position targets at 50 Hz</span></div>
+</div>
+<p>With that change, the first run went from 0.2% to 75.7% success while walking. Everything after that was about making the numbers honest and then making them high.</p>
+<h3>A learned estimator</h3>
+<p>The balance controller needs to know how fast the pole is tipping, and a camera can't measure that directly. A Kalman filter estimates it from a simple model. I trained a small network to do the same job by imitating a "teacher" that sees the true pole state in simulation. The method is DAgger: the student drives, the teacher labels what it should have said, and the student retrains on its own mistakes. The result is about 30% more accurate than the Kalman filter.</p>
+<h3>The robot's real software interface, before the real robot</h3>
+<p>Training happens in Isaac Lab. Before asking for robot time, I ran the exported policy in a different simulator (MuJoCo), talking to it through the same messaging layer the real H2 uses (DDS). A policy that only works in the simulator it was trained in has learned that simulator.</p>
+
+<h2>Results</h2>
+<p>All numbers are from 1,024 test episodes on a random seed the model was never trained or selected on, with the realistic camera model.</p>
+<table>
+  <tr><th>Test</th><th class="num">Pole still up</th></tr>
+  <tr><td>Standing</td><td class="num">98.8%</td></tr>
+  <tr><td>Walking at 0.3 m/s</td><td class="num">99.0%</td></tr>
+  <tr><td>Walking at 0.5 m/s</td><td class="num">95.1%</td></tr>
+  <tr><td>Pole handed over carelessly, then released</td><td class="num">86.7 – 92.0%</td></tr>
+  <tr><td>Second simulator, through the robot interface, walking</td><td class="num">30 / 30</td></tr>
+</table>
+<p class="fine" style="margin-bottom:1.4em">The 30 / 30 row uses a later checkpoint, retrained with the robot-side velocity estimator after I traced early failures in that simulator to a bug in it.</p>
+<p>Where the walking number came from, same test each time:</p>
+<table>
+  <tr><th>Version</th><th class="num">Walking success</th></tr>
+  <tr><td>Reinforcement learning alone</td><td class="num">0.2%</td></tr>
+  <tr><td>+ LQR and inverse kinematics underneath</td><td class="num">75.7%</td></tr>
+  <tr><td>+ honest camera, learned estimator (first version)</td><td class="num">75.8%</td></tr>
+  <tr><td>+ error handling for bad camera frames, stepping allowed while standing</td><td class="num">99.0%</td></tr>
+</table>
+<figure><div class="frame"><video data-auto muted loop playsinline preload="none" poster="/assets/media/h2-handover.jpg" aria-label="The pole is placed on the robot palm with a tilt and released; the robot recovers it"><source src="/assets/media/h2-handover.mp4" type="video/mp4"></video></div><figcaption>A harder test: the pole is put down tilted and let go. The robot has to notice the release and catch the fall.</figcaption></figure>
+
+<h2>What went wrong</h2>
+<p>These cost the most time and taught me the most.</p>
+<div class="fail">
+  <h3>The estimator that looked twice as good as it was</h3>
+  <p>On recorded data, my learned estimator beat the Kalman filter by a factor of two. In the loop it was much less impressive. The cause was a leak: one input was the palm's velocity, and during data collection the arm had been driven by the <em>true</em> pole state. So the palm's motion gave away the answer. I re-collected the data with the arm driven by the estimate, which is what happens in real use. The honest gain is about 30%.</p>
+</div>
+<div class="fail">
+  <h3>A better camera made the robot drop the pole</h3>
+  <p>In the second simulator the policy failed within two seconds, but only when the camera was <em>less</em> noisy than in training. The filter adapts to how noisy the camera looks. With clean frames it trusted them fully and passed small contact vibrations straight into the "how fast is it tipping" signal. The fix was one line: never let the filter believe the camera is better than a set floor. Standing through the full camera pipeline went from 0 of 3 to 26 of 30.</p>
+</div>
+<div class="fail">
+  <h3>A camera model that was too kind</h3>
+  <p>An early version of the simulated camera reported the pole's tipping speed directly. No real camera does that. Results dropped a lot when I replaced it with an honest model, and that drop was the real starting point.</p>
+</div>
+<div class="fail">
+  <h3>A teacher the student couldn't copy</h3>
+  <p>I tried training a "teacher" policy with perfect information and then a "student" to imitate it from camera data. It failed: the teacher's actions depended on things the student's sensors can't see, so there was nothing consistent to imitate. Only teach from a teacher the student could, in principle, become.</p>
+</div>
+<div class="note"><p><b>What I'd tell someone starting this:</b> training curves aren't results. Every claim here comes from held-out test runs, and several ideas that looked good in training lost to their own starting point when tested the same way.</p></div>
+
+<h2>What's next</h2>
+<ul>
+  <li>Run it on the real H2 this winter, standing first, then walking.</li>
+  <li>Measure the real arm's friction and delay and feed them back into training.</li>
+  <li>Turning in place still tracks only about 70% of the commanded rate.</li>
+</ul>
+<p>The code is private while the work is in progress. I'm happy to walk through it.</p>
+<p class="next"><a href="/#work">← All work</a><a href="/work/one-policy-five-robots.html">One policy, five robots →</a></p>
+</article>
+</main>
+<footer class="contact" id="contact"><div class="wrap">
+  <p class="label">Contact</p>
+  <h2>I'm looking for a robotics or robot-learning internship for summer 2027.</h2>
+  <div class="cta">
+    <a class="btn primary" href="mailto:kaidalisohaib@gmail.com">kaidalisohaib@gmail.com</a>
+    <a class="btn" href="https://www.linkedin.com/in/sohaib-kaidali">LinkedIn</a>
+    <a class="btn" href="https://github.com/kaidalisohaib">GitHub</a>
+    <a class="btn" href="/assets/documents/Sohaib_Kaidali_CV_2026.pdf">CV (PDF)</a>
+  </div>
+  <p class="fine"><span>© 2026 Sohaib Kaidali</span></p>
+</div></footer>
+<script src="/assets/js/site.js" defer></script>
+</body>
+</html>

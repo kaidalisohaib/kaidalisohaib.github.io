@@ -78,3 +78,5 @@ _site/
 
 # Performance monitoring
 performance-*.json
+# Local working notes (not deployed)
+docs/

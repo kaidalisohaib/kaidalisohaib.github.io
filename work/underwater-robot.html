@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation and perception for an underwater robot — Sohaib Kaidali</title>
+<meta name="description" content="A Unity digital twin, a synthetic-data pipeline and a 30 Hz C++ perception stack for McGill Robotics' autonomous underwater vehicle. 6th overall at RoboSub.">
+<meta name="author" content="Sohaib Kaidali">
+<link rel="canonical" href="https://kaidalisohaib.github.io/work/underwater-robot.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Simulation and perception for an underwater robot — Sohaib Kaidali">
+<meta property="og:description" content="A Unity digital twin, a synthetic-data pipeline and a 30 Hz C++ perception stack for McGill Robotics' autonomous underwater vehicle. 6th overall at RoboSub.">
+<meta property="og:url" content="https://kaidalisohaib.github.io/work/underwater-robot.html">
+<meta property="og:image" content="https://kaidalisohaib.github.io/assets/media/auv-pool.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#fbfaf6">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}})()</script>
+<link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="me" href="/">Sohaib Kaidali</a>
+  <nav aria-label="Main">
+    <a href="/#work">Work</a>
+    <a href="/#experience" class="opt">Experience</a>
+    <a href="/#about" class="opt">About</a>
+    <a href="/assets/documents/Sohaib_Kaidali_CV_2026.pdf">CV</a>
+    <a href="mailto:kaidalisohaib@gmail.com">Contact</a>
+  </nav>
+  <button class="theme" type="button" aria-label="Switch between light and dark theme" title="Light / dark">◐</button>
+</div></header>
+<main id="main">
+<div class="cs-head"><div class="wrap">
+  <p class="crumb"><a href="/#work">← All work</a> &nbsp;·&nbsp; <span class="label">McGill Robotics · autonomous underwater vehicle</span></p>
+  <h1>How do you test an underwater robot when the pool is booked?</h1>
+  <p class="answer">Build the pool. I rebuilt our simulator so the robot's real software runs against it, used it to make training images, and wrote the on-board pipeline that maps objects in 3D. The team placed 6th overall at RoboSub.</p>
+  <dl class="meta"><div><dt>My role</dt><dd>Software engineer: simulation, perception, state estimation</dd></div><div><dt>When</dt><dd>Sept 2025 – now</dd></div><div><dt>Stack</dt><dd>C++, ROS 2, Unity, TensorRT, Jetson AGX Orin</dd></div><div><dt>Code</dt><dd><a href="https://github.com/mcgill-robotics/AUV-2026">GitHub</a></dd></div></dl>
+</div></div>
+<article class="cs">
+
+<figure class="wide"><div class="frame"><button class="yt" type="button" data-yt="Jneol7KcG6w" aria-label="Play video: the AUV simulator, with live sensors, telemetry and mission testing"><img src="/assets/media/auv-video.jpg" alt="The underwater robot in the simulated pool, with panels for telemetry, sensor data and the camera feed" width="1280" height="720"><span class="yt-play" aria-hidden="true"></span></button></div><figcaption>The simulator in use (video, McGill Robotics). The robot's software connects to it over the network exactly as it connects to the real sensors.</figcaption></figure>
+
+<h2>The problem</h2>
+<p>RoboSub is a competition where a submarine robot has to find and pass through gates, follow markers and hit targets with no human control. Our team gets a few hours of pool time a week. Every bug found in the pool is an expensive one, and every labelled training image used to be drawn by hand.</p>
+
+<h2>What I built</h2>
+<h3>A simulator the real software can't tell from the robot</h3>
+<p>I rebuilt the team's Unity simulator as a digital twin: the same thrusters, the same sensors (cameras, depth, IMU, DVL, hydrophones), sending the same ROS 2 messages. The control, planning and vision code run unchanged against it. This is called software-in-the-loop testing, and it means a mission can be rehearsed on a laptop.</p>
+<figure><div class="frame"><img src="/assets/media/auv-zed.jpg" alt="The stereo camera vendor's own viewer displaying depth and a point cloud from the simulated camera" loading="lazy" width="1440" height="705"></div><figcaption>The simulated stereo camera is close enough to the real one that the camera vendor's own tool opens its stream and computes depth from it.</figcaption></figure>
+<h3>Training images without labelling</h3>
+<p>The simulator knows where every object is, so it can label its own images. With a teammate, I built the pipeline from simulator to trained detector. The first detectors trained only on simulated images failed on real ones. What fixed it was heavy image augmentation and modelling how water bends light at the camera housing (refraction), which changes where objects appear.</p>
+<h3>Seeing in 3D on the robot</h3>
+<p>I wrote the on-board perception pipeline in C++ and ROS 2. A neural network (accelerated with TensorRT) finds objects in each frame. Depth gives their position. A Kalman filter smooths each object's position over time, and Hungarian matching decides which detection belongs to which known object. The result is a map of what is where, updated 30 times a second on the Jetson.</p>
+<div class="flow">
+  <div><b>Stereo camera</b><span>image + depth</span></div>
+  <div class="rl"><b>Detector</b><span>TensorRT on the GPU</span></div>
+  <div><b>3D position</b><span>from depth</span></div>
+  <div class="mb"><b>Tracking</b><span>Kalman filter + Hungarian matching</span></div>
+  <div><b>Object map</b><span>30 Hz, used by the mission planner</span></div>
+</div>
+
+<h2>Results</h2>
+<figure><div class="frame"><video data-auto muted loop playsinline preload="none" poster="/assets/media/auv-pool.jpg" aria-label="The real underwater robot swimming past a pole in a pool during an autonomous run"><source src="/assets/media/auv-pool.mp4" type="video/mp4"></video></div><figcaption>The real robot on an autonomous run in the pool, with no one steering it (shown at 2× speed).</figcaption></figure>
+<table>
+  <tr><th>Measure</th><th class="num">Result</th></tr>
+  <tr><td>First detector, trained on zero real images, tested on 477 real pool images</td><td class="num">0.46 mAP50</td></tr>
+  <tr><td>Final detector, tested on real pool images</td><td class="num">0.83 mAP50</td></tr>
+  <tr><td>Hand-labelling saved at competition</td><td class="num">5+ hours</td></tr>
+  <tr><td>3D object map on Jetson AGX Orin</td><td class="num">30 Hz</td></tr>
+  <tr><td>RoboSub 2026</td><td class="num">6th overall</td></tr>
+</table>
+<p>The first number is what simulated images alone gave us, with no labelling at all. At competition, where the props were new, that meant a working detector hours before a hand-labelled one would have been ready. The final detector reached 0.83.</p>
+
+<h2 id="sysid">What went wrong: the model fit that was worse than guessing</h2>
+<p>We wanted model predictive control, which needs a model of how the robot moves through water: how much the water drags on it and how much water it has to push out of the way (added mass). I wrote an optimizer (CasADi with IPOPT) to fit those numbers to recorded pool runs.</p>
+<p>It converged. Then I checked its predictions against data it hadn't seen, and it did worse than predicting the average every time.</p>
+<p>The optimizer was fine. The data couldn't answer the question:</p>
+<ul>
+  <li><b>The runs were recorded with the controller on.</b> The controller pushes exactly as hard as needed to cancel drag, so drag and thrust always appear together and can't be separated.</li>
+  <li><b>I had the commanded force, not the real one.</b> The thrusters saturate and have a dead zone near zero.</li>
+  <li><b>The tether pulled the robot forward</b> with about 1.7 N, which the fit blamed on the model.</li>
+</ul>
+<p>We used hand-tuned values for the season. I wrote a new test procedure for the pool: controller off, constant thrust until the speed settles (thrust then equals drag), then cut power and let it coast. I also turned the lesson into the modelling chapter of <a href="https://kaidalisohaib.github.io/auv-lab/">AUV Lab</a>, the interactive course I built for new members.</p>
+<div class="note"><p><b>What I took from it:</b> look at how the data was collected before fitting anything to it. A fit that converges tells you about the optimizer.</p></div>
+
+<h2>Related</h2>
+<ul>
+  <li><a href="https://kaidalisohaib.github.io/auv-lab/">AUV Lab</a>: thruster allocation, PID, LQR and MPC explained interactively.</li>
+  <li><a href="https://github.com/kaidalisohaib/ros2-unity-sensors">ros2-unity-sensors</a>: the simulator's sensors as a reusable package.</li>
+  <li><a href="https://github.com/kaidalisohaib/auv-hydrodynamic-sysid">auv-hydrodynamic-sysid</a>: the fitting code and the pool procedure.</li>
+</ul>
+<p class="next"><a href="/work/one-policy-five-robots.html">← One policy, five robots</a><a href="/work/friction-cliff-bench.html">RL vs MPC on ice →</a></p>
+</article>
+</main>
+<footer class="contact" id="contact"><div class="wrap">
+  <p class="label">Contact</p>
+  <h2>I'm looking for a robotics or robot-learning internship for summer 2027.</h2>
+  <div class="cta">
+    <a class="btn primary" href="mailto:kaidalisohaib@gmail.com">kaidalisohaib@gmail.com</a>
+    <a class="btn" href="https://www.linkedin.com/in/sohaib-kaidali">LinkedIn</a>
+    <a class="btn" href="https://github.com/kaidalisohaib">GitHub</a>
+    <a class="btn" href="/assets/documents/Sohaib_Kaidali_CV_2026.pdf">CV (PDF)</a>
+  </div>
+  <p class="fine"><span>© 2026 Sohaib Kaidali</span></p>
+</div></footer>
+<script src="/assets/js/site.js" defer></script>
+</body>
+</html>

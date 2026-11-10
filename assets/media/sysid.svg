@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" font-family="system-ui, sans-serif">
+<rect width="640" height="400" fill="#fbfaf6"/>
+<g stroke="#d9d5c8" stroke-width="1" fill="none"><path d="M70 40v300h520"/><path d="M70 115h520M70 190h520M70 265h520" stroke="#e9e6dc"/></g>
+<text x="330" y="378" text-anchor="middle" font-size="15" fill="#6b7785">time</text>
+<text x="28" y="194" text-anchor="middle" font-size="15" fill="#6b7785" transform="rotate(-90 28 194)">speed</text>
+<path d="M70 300 C120 200 140 120 180 150 S240 250 290 180 S360 90 410 160 S480 260 590 130" fill="none" stroke="#1b2330" stroke-width="3.5"/>
+<path d="M70 190 H590" fill="none" stroke="#d9531f" stroke-width="3.5" stroke-dasharray="10 8"/>
+<path d="M70 300 C110 290 150 60 200 240 S260 60 310 300 S380 40 430 290 S520 70 590 250" fill="none" stroke="#2a78d6" stroke-width="3.5"/>
+<g font-size="16" font-weight="600"><text x="96" y="64" fill="#1b2330">measured</text><text x="216" y="64" fill="#d9531f">always guess the average</text><text x="456" y="64" fill="#2a78d6">fitted model</text></g>
+<text x="330" y="26" text-anchor="middle" font-size="15" fill="#4a5464">Illustration: on unseen data the fitted model did worse than a constant (R² below 0)</text>
+</svg>

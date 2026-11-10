@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Friction-Cliff-Bench: RL vs MPC when a car hits ice — Sohaib Kaidali</title>
+<meta name="description" content="A pre-registered benchmark comparing reinforcement learning with adaptive model predictive control under sudden loss of grip, restricted to scenarios that are physically recoverable.">
+<meta name="author" content="Sohaib Kaidali">
+<link rel="canonical" href="https://kaidalisohaib.github.io/work/friction-cliff-bench.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Friction-Cliff-Bench: RL vs MPC when a car hits ice — Sohaib Kaidali">
+<meta property="og:description" content="A pre-registered benchmark comparing reinforcement learning with adaptive model predictive control under sudden loss of grip, restricted to scenarios that are physically recoverable.">
+<meta property="og:url" content="https://kaidalisohaib.github.io/work/friction-cliff-bench.html">
+<meta property="og:image" content="https://kaidalisohaib.github.io/assets/media/fcb-feasibility.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#fbfaf6">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}})()</script>
+<link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="me" href="/">Sohaib Kaidali</a>
+  <nav aria-label="Main">
+    <a href="/#work">Work</a>
+    <a href="/#experience" class="opt">Experience</a>
+    <a href="/#about" class="opt">About</a>
+    <a href="/assets/documents/Sohaib_Kaidali_CV_2026.pdf">CV</a>
+    <a href="mailto:kaidalisohaib@gmail.com">Contact</a>
+  </nav>
+  <button class="theme" type="button" aria-label="Switch between light and dark theme" title="Light / dark">◐</button>
+</div></header>
+<main id="main">
+<div class="cs-head"><div class="wrap">
+  <p class="crumb"><a href="/#work">← All work</a> &nbsp;·&nbsp; <span class="label">Personal research project · in progress</span></p>
+  <h1>Can reinforcement learning beat model predictive control when a car hits ice?</h1>
+  <p class="answer">I don't know yet, and that is deliberate. The simulator, the labels and the plan are done and the comparison is running. I wrote down what I expect and what would prove me wrong before looking at any result.</p>
+  <dl class="meta"><div><dt>My role</dt><dd>Everything: design, simulator, controllers, evaluation</dd></div><div><dt>When</dt><dd>Oct 2026 – now</dd></div><div><dt>Stack</dt><dd>Python, NVIDIA Warp, PyTorch</dd></div><div><dt>Status</dt><dd>Tuning phase. No comparison results yet.</dd></div></dl>
+</div></div>
+<article class="cs">
+
+<h2>The problem</h2>
+<p>A car is in a corner on dry road and the surface turns to ice. Grip drops to about a ninth of what it was, in a few metres. Two families of controller claim to handle this:</p>
+<ul>
+  <li><b>Reinforcement learning</b>: a network trained on millions of simulated skids, which works out the grip from how the car has just been behaving.</li>
+  <li><b>Model predictive control</b> (here MPPI): simulate thousands of possible futures every instant, pick the best, and update the grip estimate on the fly.</li>
+</ul>
+<p>Papers usually report one beating the other. Two things make those comparisons hard to trust. Many test cases are crashes that no controller could avoid, which only adds noise. And the method the authors care about usually gets more tuning.</p>
+
+<h2>What I built</h2>
+<h3>First, find out what is possible</h3>
+<p>Before comparing anything, every scenario gets one of four labels: impossible, possible only if you see the ice coming, possible by reacting, or undetermined. The "impossible" label comes from a proof (the tyres can't supply the force the corner needs, even used perfectly). The "possible" labels come from oracle controllers that are told the true grip.</p>
+<figure class="wide"><div class="frame"><img src="/assets/media/fcb-feasibility.png" alt="Grid of bar charts for ice, snow and wet surfaces and four patch lengths. Each bar splits arrival speed into possible, undetermined and certified infeasible ranges." width="2080" height="1200"></div><figcaption>What the proof alone decides. Rows are surfaces, columns are how long the slippery patch is, and each bar is a corner radius. Blue: recoverable. Orange: proven impossible. Green: the proof can't say, so oracle controllers decide. Controllers are compared only where recovery is possible.</figcaption></figure>
+<h3>A fast simulator I can trust</h3>
+<p>The vehicle model is a bicycle model with Pacejka tyre curves, the standard description of how tyre force saturates and falls off when sliding. I wrote it twice: a slow, readable NumPy version and a GPU version in NVIDIA Warp. 150 automated tests check that they agree. The GPU version runs 320 million control steps per second on a laptop GPU, and the GPU MPPI evaluates about 200 million rollout steps per second.</p>
+<h3>A fair fight, agreed in advance</h3>
+<ul>
+  <li>Both methods get the same sensors and the same number of tuning trials, logged in a ledger.</li>
+  <li>The hypotheses, the metrics, and the results that would disprove each hypothesis were committed to the repository before any comparison ran (pre-registration).</li>
+  <li>My prediction, on record: "RL wins" will not survive a properly tuned adaptive baseline.</li>
+</ul>
+
+<h2>Where it stands</h2>
+<table>
+  <tr><th>Part</th><th>State</th></tr>
+  <tr><td>GPU simulator and reference model</td><td>Done, 150 tests passing</td></tr>
+  <tr><td>Feasibility proof and oracle labelling</td><td>Done for the tuning scenarios</td></tr>
+  <tr><td>Adaptive MPPI and PPO teacher/student</td><td>Implemented, being tuned under the shared budget</td></tr>
+  <tr><td>Labelling the held-out test scenarios</td><td>Next</td></tr>
+  <tr><td>The comparison itself</td><td>Not run yet</td></tr>
+</table>
+<div class="note"><p><b>No result is claimed here.</b> When the comparison is done, this page gets the regime map: where each method wins, where neither can, and whether my prediction held.</p></div>
+
+<h2>What I've learned so far</h2>
+<ul>
+  <li>Writing down what would prove me wrong changed the design. Several scenarios I had planned turned out to be impossible for any controller.</li>
+  <li>A second, slow implementation is the cheapest test there is for a fast one.</li>
+  <li>Reinforcement learning needed a warm start from a simple controller and about 200 million steps before it was competitive. Stopping earlier would have "shown" that it loses.</li>
+</ul>
+<p>The repository is private until the results are in.</p>
+<p class="next"><a href="/work/underwater-robot.html">← Underwater robot</a><a href="/#more">More projects →</a></p>
+</article>
+</main>
+<footer class="contact" id="contact"><div class="wrap">
+  <p class="label">Contact</p>
+  <h2>I'm looking for a robotics or robot-learning internship for summer 2027.</h2>
+  <div class="cta">
+    <a class="btn primary" href="mailto:kaidalisohaib@gmail.com">kaidalisohaib@gmail.com</a>
+    <a class="btn" href="https://www.linkedin.com/in/sohaib-kaidali">LinkedIn</a>
+    <a class="btn" href="https://github.com/kaidalisohaib">GitHub</a>
+    <a class="btn" href="/assets/documents/Sohaib_Kaidali_CV_2026.pdf">CV (PDF)</a>
+  </div>
+  <p class="fine"><span>© 2026 Sohaib Kaidali</span></p>
+</div></footer>
+<script src="/assets/js/site.js" defer></script>
+</body>
+</html>

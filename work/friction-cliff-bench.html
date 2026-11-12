@@ -53,7 +53,7 @@
 <p>Before comparing anything, every scenario gets one of four labels: impossible, possible only if you see the ice coming, possible by reacting, or undetermined. The "impossible" label comes from a proof (the tyres can't supply the force the corner needs, even used perfectly). The "possible" labels come from oracle controllers that are told the true grip.</p>
 <figure class="wide"><div class="frame"><img src="/assets/media/fcb-feasibility.png" alt="Grid of bar charts for ice, snow and wet surfaces and four patch lengths. Each bar splits arrival speed into possible, undetermined and certified infeasible ranges." width="2080" height="1200"></div><figcaption>What the proof alone decides. Rows are surfaces, columns are how long the slippery patch is, and each bar is a corner radius. Blue: recoverable. Orange: proven impossible. Green: the proof can't say, so oracle controllers decide. Controllers are compared only where recovery is possible.</figcaption></figure>
 <h3>A fast simulator I can trust</h3>
-<p>The vehicle model is a bicycle model with Pacejka tyre curves, the standard description of how tyre force saturates and falls off when sliding. I wrote it twice: a slow, readable NumPy version and a GPU version in NVIDIA Warp. 150 automated tests check that they agree. The GPU version runs 320 million control steps per second on a laptop GPU, and the GPU MPPI evaluates about 200 million rollout steps per second.</p>
+<p>The vehicle model is a bicycle model with Pacejka tyre curves, the standard description of how tyre force saturates and falls off when sliding. I wrote it twice: a slow, readable NumPy version and a GPU version in NVIDIA Warp. Automated tests check that they agree (190+ across the project, pytest and GoogleTest). The GPU version runs about 270 million control steps per second on a laptop GPU. I also wrote the MPPI controller as a C++17/CUDA library: for one car it plans over 1,024 sampled trajectories, 150 steps each, in about 15 ms, inside the 20 ms control step, and runs up to 1.35× faster than the Warp version.</p>
 <h3>A fair fight, agreed in advance</h3>
 <ul>
   <li>Both methods get the same sensors and the same number of tuning trials, logged in a ledger.</li>
@@ -64,11 +64,11 @@
 <h2>Where it stands</h2>
 <table>
   <tr><th>Part</th><th>State</th></tr>
-  <tr><td>GPU simulator and reference model</td><td>Done, 150 tests passing</td></tr>
-  <tr><td>Feasibility proof and oracle labelling</td><td>Done for the tuning scenarios</td></tr>
-  <tr><td>Adaptive MPPI and PPO teacher/student</td><td>Implemented, being tuned under the shared budget</td></tr>
-  <tr><td>Labelling the held-out test scenarios</td><td>Next</td></tr>
-  <tr><td>The comparison itself</td><td>Not run yet</td></tr>
+  <tr><td>GPU simulator and reference model</td><td>Done</td></tr>
+  <tr><td>C++17/CUDA MPPI library</td><td>Done, benchmarked</td></tr>
+  <tr><td>Feasibility proof and oracle labelling</td><td>Done (4,000 held-out test scenarios labelled)</td></tr>
+  <tr><td>Adaptive MPPI and PPO teacher/student</td><td>Tuned under the shared budget, final models trained (5 seeds)</td></tr>
+    <tr><td>The comparison itself</td><td>Running on the held-out test set</td></tr>
 </table>
 <div class="note"><p><b>No result is claimed here.</b> When the comparison is done, this page gets the regime map: where each method wins, where neither can, and whether my prediction held.</p></div>
 

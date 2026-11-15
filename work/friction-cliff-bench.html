@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Friction-Cliff-Bench: RL vs MPC when a car hits ice — Sohaib Kaidali</title>
-<meta name="description" content="A pre-registered benchmark comparing reinforcement learning with adaptive model predictive control under sudden loss of grip, restricted to scenarios that are physically recoverable.">
+<title>Friction-Cliff-Bench: car control when the road turns to ice — Sohaib Kaidali</title>
+<meta name="description" content="A pre-registered simulation benchmark of car control under sudden friction loss. Under fair conditions, a learned RL policy did not beat adaptive MPPI; much of its apparent safety came from driving slower.">
 <meta name="author" content="Sohaib Kaidali">
 <link rel="canonical" href="https://kaidalisohaib.github.io/work/friction-cliff-bench.html">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Friction-Cliff-Bench: RL vs MPC when a car hits ice — Sohaib Kaidali">
-<meta property="og:description" content="A pre-registered benchmark comparing reinforcement learning with adaptive model predictive control under sudden loss of grip, restricted to scenarios that are physically recoverable.">
+<meta property="og:title" content="Friction-Cliff-Bench: car control when the road turns to ice — Sohaib Kaidali">
+<meta property="og:description" content="A pre-registered simulation benchmark of car control under sudden friction loss. Under fair conditions, a learned RL policy did not beat adaptive MPPI; much of its apparent safety came from driving slower.">
 <meta property="og:url" content="https://kaidalisohaib.github.io/work/friction-cliff-bench.html">
 <meta property="og:image" content="https://kaidalisohaib.github.io/assets/media/fcb-feasibility.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -33,52 +33,65 @@
 </div></header>
 <main id="main">
 <div class="cs-head"><div class="wrap">
-  <p class="crumb"><a href="/#work">← All work</a> &nbsp;·&nbsp; <span class="label">Personal research project · in progress</span></p>
-  <h1>Can reinforcement learning beat model predictive control when a car hits ice?</h1>
-  <p class="answer">I don't know yet, and that is deliberate. The simulator, the labels and the plan are done and the comparison is running. I wrote down what I expect and what would prove me wrong before looking at any result.</p>
-  <dl class="meta"><div><dt>My role</dt><dd>Everything: design, simulator, controllers, evaluation</dd></div><div><dt>When</dt><dd>Oct 2026 – now</dd></div><div><dt>Stack</dt><dd>Python, NVIDIA Warp, PyTorch</dd></div><div><dt>Status</dt><dd>Tuning phase. No comparison results yet.</dd></div></dl>
+  <p class="crumb"><a href="/#work">← All work</a> &nbsp;·&nbsp; <span class="label">Personal research project · finished, code public</span></p>
+  <h1>When the road suddenly turns to ice, can a learned policy beat adaptive MPC under fair conditions, and in which scenarios can nothing save the car?</h1>
+  <p class="answer">Under fair conditions, no. The reinforcement-learning policy did not beat adaptive MPPI, and a big part of its apparent safety came from driving slower. After I found and fixed a bug in how it was trained, it matched adaptive MPPI at the same speed, but did not beat it.</p>
+  <dl class="meta"><div><dt>My role</dt><dd>Everything: design, simulator, controllers, statistics, report</dd></div><div><dt>When</dt><dd>Oct 13 – Nov 14, 2026</dd></div><div><dt>Stack</dt><dd>C++17/CUDA, Python, NVIDIA Warp, PyTorch</dd></div><div><dt>Links</dt><dd><a href="https://github.com/kaidalisohaib/friction-cliff-bench">Code (MIT)</a> · <a href="https://github.com/kaidalisohaib/friction-cliff-bench/releases/latest/download/friction-cliff-bench.pdf">Technical report (PDF)</a></dd></div></dl>
 </div></div>
 <article class="cs">
 
+<figure class="wide"><div class="frame"><video data-auto muted loop playsinline preload="none" poster="/assets/media/fcb-hero.jpg" aria-label="Two MPPI controllers on a curve whose entry turns to ice. Left: the planner assumes dry road, its sampled plans curve sharply and the car spins off. Right: the planner is told the current friction and stays in lane."><source src="/assets/media/fcb-hero.mp4" type="video/mp4"></video></div><figcaption>Why friction matters. Same controller, same ice patch: the left planner assumes dry road and keeps believing it can turn; the right one knows the current friction. Orange lines are its sampled plans. (Tuning scenario, not a result.)</figcaption></figure>
+
 <h2>The problem</h2>
-<p>A car is in a corner on dry road and the surface turns to ice. Grip drops to about a ninth of what it was, in a few metres. Two families of controller claim to handle this:</p>
+<p>A car is in a corner on dry road and the surface turns to wet, snow or ice within a few metres. Two families of controller claim to handle this:</p>
 <ul>
-  <li><b>Reinforcement learning</b>: a network trained on millions of simulated skids, which works out the grip from how the car has just been behaving.</li>
-  <li><b>Model predictive control</b> (here MPPI): simulate thousands of possible futures every instant, pick the best, and update the grip estimate on the fly.</li>
+  <li><b>Reinforcement learning</b>: a network trained on millions of simulated skids that works out the grip from how the car has just been behaving (here an RMA-style teacher–student PPO policy).</li>
+  <li><b>Adaptive model predictive control</b> (here MPPI): simulate a thousand possible futures every step, pick the best, and keep a running estimate of the grip, either with a bank of models or a learned friction estimator.</li>
 </ul>
-<p>Papers usually report one beating the other. Two things make those comparisons hard to trust. Many test cases are crashes that no controller could avoid, which only adds noise. And the method the authors care about usually gets more tuning.</p>
+<p>Papers usually report one beating the other. Two things make those comparisons hard to trust. Many test cases are crashes no controller could avoid, which just adds noise. And the method the authors care about usually gets more information or more tuning.</p>
 
 <h2>What I built</h2>
 <h3>First, find out what is possible</h3>
-<p>Before comparing anything, every scenario gets one of four labels: impossible, possible only if you see the ice coming, possible by reacting, or undetermined. The "impossible" label comes from a proof (the tyres can't supply the force the corner needs, even used perfectly). The "possible" labels come from oracle controllers that are told the true grip.</p>
-<figure class="wide"><div class="frame"><img src="/assets/media/fcb-feasibility.png" alt="Grid of bar charts for ice, snow and wet surfaces and four patch lengths. Each bar splits arrival speed into possible, undetermined and certified infeasible ranges." width="2080" height="1200"></div><figcaption>What the proof alone decides. Rows are surfaces, columns are how long the slippery patch is, and each bar is a corner radius. Blue: recoverable. Orange: proven impossible. Green: the proof can't say, so oracle controllers decide. Controllers are compared only where recovery is possible.</figcaption></figure>
-<h3>A fast simulator I can trust</h3>
-<p>The vehicle model is a bicycle model with Pacejka tyre curves, the standard description of how tyre force saturates and falls off when sliding. I wrote it twice: a slow, readable NumPy version and a GPU version in NVIDIA Warp. Automated tests check that they agree (190+ across the project, pytest and GoogleTest). The GPU version runs about 270 million control steps per second on a laptop GPU. I also wrote the MPPI controller as a C++17/CUDA library: for one car it plans over 1,024 sampled trajectories, 150 steps each, in about 15 ms, inside the 20 ms control step, and runs up to 1.35× faster than the Warp version.</p>
+<p>Every scenario gets a label before any controller is compared: reactive-feasible (you can save it by reacting), preview-required (only if you see the ice coming), certified-infeasible, or undetermined. The "infeasible" label comes from a proof: a friction-circle certificate shows the tyres can't supply the force the corner needs, even used perfectly. The "feasible" labels come from oracle MPPI controllers that are told the true grip. 4,000 held-out test scenarios were labelled this way.</p>
+<figure class="wide"><div class="frame"><img src="/assets/media/fcb-feasibility.png" alt="Grid of bar charts for ice, snow and wet surfaces and four patch lengths. Each bar splits arrival speed into possible, undetermined and certified infeasible ranges." width="2080" height="1200" loading="lazy"></div><figcaption>What the proof alone decides. Rows are surfaces, columns are how long the slippery patch is, each bar is a corner radius. Blue: recoverable. Orange: proven impossible. Green: the proof can't say, so the oracle controllers decide.</figcaption></figure>
+<h3>A simulator and a controller I can trust</h3>
+<p>The car is a dynamic bicycle model with combined-slip Pacejka tyres and separate friction on each axle, written in NVIDIA Warp so thousands of cars run at once on the GPU. I wrote it test-first against a slow float64 reference model. Then I wrote the MPPI controller a second time in C++17/CUDA (CMake, GoogleTest in CI, Python bindings). It reproduces the Warp version's random number stream bit for bit, so both draw exactly the same samples and can be compared on whole control steps.</p>
+<table>
+  <tr><th>Compute (RTX 5090 Laptop GPU)</th><th class="num">C++/CUDA</th><th class="num">Warp</th></tr>
+  <tr><td>One MPPI step, 1 car, 1,024 samples × 150-step horizon (median of 30)</td><td class="num">15.3 ms</td><td class="num">15.8 ms</td></tr>
+  <tr><td>Same, 64 cars at once (median of 30)</td><td class="num">46.8 ms</td><td class="num">58.9 ms</td></tr>
+  <tr><td>Learned policy, one step on one CPU thread (median of 300)</td><td class="num" colspan="2">0.19 ms</td></tr>
+</table>
 <h3>A fair fight, agreed in advance</h3>
 <ul>
-  <li>Both methods get the same sensors and the same number of tuning trials, logged in a ledger.</li>
-  <li>The hypotheses, the metrics, and the results that would disprove each hypothesis were committed to the repository before any comparison ran (pre-registration).</li>
-  <li>My prediction, on record: "RL wins" will not survive a properly tuned adaptive baseline.</li>
+  <li>Every method gets the same observations and the same logged tuning budget, and is run on the same paired scenarios.</li>
+  <li>The hypotheses, the splits and the statistics (hierarchical bootstrap, equivalence tests, Holm correction) were committed before any test data was labelled (git tags <code>prereg-v1</code> and <code>prereg-v2</code>). Every later change is a dated amendment, A1 to A9.</li>
+  <li>Failure rates are compared only where the car can physically be saved.</li>
 </ul>
 
-<h2>Where it stands</h2>
-<table>
-  <tr><th>Part</th><th>State</th></tr>
-  <tr><td>GPU simulator and reference model</td><td>Done</td></tr>
-  <tr><td>C++17/CUDA MPPI library</td><td>Done, benchmarked</td></tr>
-  <tr><td>Feasibility proof and oracle labelling</td><td>Done (4,000 held-out test scenarios labelled)</td></tr>
-  <tr><td>Adaptive MPPI and PPO teacher/student</td><td>Tuned under the shared budget, final models trained (5 seeds)</td></tr>
-    <tr><td>The comparison itself</td><td>Running on the held-out test set</td></tr>
-</table>
-<div class="note"><p><b>No result is claimed here.</b> When the comparison is done, this page gets the regime map: where each method wins, where neither can, and whether my prediction held.</p></div>
+<h2>What I found</h2>
+<h3>The labels change the ranking</h3>
+<figure class="wide"><div class="frame"><img src="/assets/media/fcb-by-class.png" alt="Bar chart of lane-departure rate per method for each feasibility class. On reactive-feasible scenarios most methods are below 0.2; on preview-required scenarios reactive controllers nearly always fail; on certified-infeasible scenarios everything fails." width="1540" height="560" loading="lazy"></div><figcaption>Lane-departure rate by feasibility class (95% CIs). Where only a preview can save the car, reactive controllers nearly always fail, and on certified-infeasible scenarios everything fails. A single pooled failure rate mostly measures the scenario mix.</figcaption></figure>
+<h3>The learned policy did not beat adaptive MPPI</h3>
+<p>On 3,009 paired reactive-feasible scenarios × 5 seeds, the RL student did not beat the model-bank MPPI: departure difference −15.6 pp, 95% CI [−42.1, +1.0]. The interval is that wide because the PPO training seeds ranged from excellent to failing. A sanity gate I had pre-registered flagged that instability before the test run.</p>
+<h3>Much of its safety was caution</h3>
+<p>The learned policies reach the ice noticeably slower than the reference speed. So I drove the bank MPPI at the student's arrival speed: it departs 0.006 of the time vs 0.190 for the student. Slowing down has a price, too: a 16.0% [15.4, 16.7] loss of pace on dry road.</p>
+<figure class="wide"><div class="frame"><img src="/assets/media/fcb-caution.png" alt="Left: departure rate against mean arrival speed for every method; the RL policies sit at low speed with wide error bars. Right: departure rates within matched arrival-speed bins." width="1540" height="532" loading="lazy"></div><figcaption>Adaptation or caution? Left: safety against arrival speed. Right: departure rates compared at matched speed.</figcaption></figure>
+<p>Two more results. A student distilled from a teacher that can see the road ahead departs 17.7 pp less [1.2, 44.3] than one distilled from a teacher that only knows the current friction, even though the student itself never sees the road ahead. And model mismatch did not hurt the bank MPPI on any of the three axes I tested, which went against my prediction.</p>
 
-<h2>What I've learned so far</h2>
+<h2>Debugging the seed instability</h2>
+<p>Two of five PPO teacher seeds collapsed. Training is deterministic per seed, so I could replay a failing run exactly. I ruled out four hypotheses on 10 seeds each (reward normalisation, a bound penalty, the learning rate and the discount factor). The real cause was a mismatch: checkpoints were kept based on success during training, with exploration noise on, but the policy is deployed without noise. Selecting checkpoints on deterministic held-out validation fixed it.</p>
+<p>I then re-tested under a second pre-registration (A9) on 2,233 fresh scenarios. All 10 seeds of the repaired policy passed the reliability gate (old recipe: 8/10), and at matched speed it was non-inferior to adaptive MPPI: +0.3 pp [−0.3, +0.9] with a 2 pp margin. Not superior.</p>
+<figure class="wide"><div class="frame"><img src="/assets/media/fcb-followup.png" alt="Left: departure rate for each training seed; the old recipe has one seed near 0.7, the repaired recipe's seeds are all low. Right: departure rate against dry-road pace tax for the oracle, bank MPPI and RL policies." width="1760" height="624" loading="lazy"></div><figcaption>Follow-up test. Left: one dot per training seed; the dashed line is the reliability gate. Right: safety against speed. The repaired policy (orange) is as safe as the bank MPPI at the same pace, not safer.</figcaption></figure>
+
+<h2>What I learned</h2>
 <ul>
-  <li>Writing down what would prove me wrong changed the design. Several scenarios I had planned turned out to be impossible for any controller.</li>
-  <li>A second, slow implementation is the cheapest test there is for a fast one.</li>
-  <li>Reinforcement learning needed a warm start from a simple controller and about 200 million steps before it was competitive. Stopping earlier would have "shown" that it loses.</li>
+  <li>Label what's possible before you compare anything. Without the labels, the ranking mostly reflects which scenarios you happened to sample.</li>
+  <li>Always check how fast each controller is going. "Safer" can just mean "slower", and that has to be priced.</li>
+  <li>Pre-registering is what made a negative result worth reporting. The gate caught the seed problem before the test, and the follow-up got its own plan instead of quietly replacing the first one.</li>
+  <li>A second, slow implementation is the cheapest test for a fast one, and reproducing the random stream exactly makes the comparison airtight.</li>
 </ul>
-<p>The repository is private until the results are in.</p>
+<p>Everything is public: the <a href="https://github.com/kaidalisohaib/friction-cliff-bench">code</a> (MIT), the <a href="https://github.com/kaidalisohaib/friction-cliff-bench/releases/tag/v1.0.0">v1.0.0 release</a> and the <a href="https://github.com/kaidalisohaib/friction-cliff-bench/releases/latest/download/friction-cliff-bench.pdf">technical report</a>. Every number on this page is written by the evaluation harness.</p>
 <p class="next"><a href="/work/underwater-robot.html">← Underwater robot</a><a href="/#more">More projects →</a></p>
 </article>
 </main>

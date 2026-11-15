@@ -55,7 +55,7 @@
   <div class="fact"><b class="num">99.0%</b><span>of 1,024 walking test episodes end with the pole still up</span></div>
   <div class="fact"><b class="num">30 Hz</b><span>3D perception running on the underwater robot's Jetson</span></div>
   <div class="fact"><b class="num">6th</b><span>overall at RoboSub, the international underwater-robot competition</span></div>
-  <div class="fact"><b class="num">270M</b><span>simulated control steps per second in my GPU car simulator</span></div>
+  <div class="fact"><b class="num">4,000</b><span>car-on-ice test scenarios labelled by what is physically possible</span></div>
 </div></div>
 
 <section id="work"><div class="wrap">
@@ -111,17 +111,17 @@
   </article>
 
   <article class="work rv">
-    <div class="work-media"><div class="frame"><img src="/assets/media/fcb-feasibility.png" alt="Chart showing, for ice, snow and wet roads, which corner speeds are recoverable, undetermined or physically impossible" loading="lazy" width="2080" height="1200"></div></div>
+    <div class="work-media"><div class="frame"><video data-auto muted loop playsinline preload="none" poster="/assets/media/fcb-hero.jpg" aria-label="Two MPPI controllers on an ice patch: the friction-blind one spins off, the friction-aware one stays in lane"><source src="/assets/media/fcb-hero.mp4" type="video/mp4"></video></div></div>
     <div>
-      <p class="label">Personal research project · 2026 · <span class="status wip">in progress</span></p>
-      <h3><a href="/work/friction-cliff-bench.html">Can reinforcement learning beat model predictive control when a car hits ice?</a></h3>
-      <p>Most comparisons include crashes nobody could have avoided. I first label which scenarios are physically recoverable, then compare the two methods only there, with the plan written down before the results.</p>
+      <p class="label">Personal research project · 2026 · <a href="https://github.com/kaidalisohaib/friction-cliff-bench">code</a> · <a href="https://github.com/kaidalisohaib/friction-cliff-bench/releases/latest/download/friction-cliff-bench.pdf">report (PDF)</a></p>
+      <h3><a href="/work/friction-cliff-bench.html">When the road turns to ice, can a learned policy beat adaptive MPC under fair conditions?</a></h3>
+      <p>No. Under matched information and tuning, the RL policy did not beat adaptive MPPI, and much of its apparent safety came from driving slower. I labelled which scenarios are physically recoverable first, pre-registered the tests, and wrote my own C++/CUDA MPPI.</p>
       <ul class="kv">
-        <li><b>270M</b><span>control steps per second in a GPU vehicle simulator I wrote</span></li>
-        <li><b>150 tests</b><span>check the GPU simulator against a slow reference model</span></li>
-        <li><b>Pre-registered</b><span>hypotheses and what would disprove them, committed before any result</span></li>
+        <li><b>3,009 × 5</b><span>paired recoverable scenarios × seeds in the pre-registered test</span></li>
+        <li><b>46.8 vs 58.9 ms</b><span>per 64-car MPPI step, my C++/CUDA version vs the Warp reference</span></li>
+        <li><b>10/10</b><span>reliable training seeds after I traced and fixed a PPO checkpoint-selection bug</span></li>
       </ul>
-      <ul class="tags"><li>NVIDIA Warp</li><li>MPPI</li><li>PPO</li><li>Vehicle dynamics</li></ul>
+      <ul class="tags"><li>C++/CUDA</li><li>MPPI</li><li>PPO</li><li>NVIDIA Warp</li><li>Statistics</li></ul>
       <a class="more" href="/work/friction-cliff-bench.html">Read the case study →</a>
     </div>
   </article>
